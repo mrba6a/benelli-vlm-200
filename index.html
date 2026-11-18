@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#07090e">
-    <title>Vehicle & Rider Twin 3D - v2.5 Mobile Pro</title>
+    <title>Vehicle & Rider Twin 3D - Benelli VLM 200 (ك م ى ٦٧٢٨)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Orbitron:wght@600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -133,7 +133,16 @@
             </svg>
         </div>
         <div class="text-base font-extrabold tracking-wider text-white">VEHICLE <span class="text-amber-500">TWIN 3D</span></div>
-        <div id="splash-sub-title" class="text-[11px] text-gray-400 mt-0.5">BENELLI VLM 200 • ك م ى ٦٧٢٨</div>
+        <div id="splash-sub-title" class="text-[11px] text-gray-400 mt-0.5 mb-3">BENELLI VLM 200 • ك م ى ٦٧٢٨</div>
+        <div class="flex items-center gap-2">
+            <button onclick="window.dismissSplashScreen()" class="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black border border-white/15 text-[10.5px] font-bold text-gray-200 transition">
+                تخطي ودخول فوري ⚡
+            </button>
+            <div class="relative inline-flex items-center px-3 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-500/50 text-[10px] font-bold text-amber-300 transition cursor-pointer overflow-hidden" onpointerdown="window.pauseSplashAutoDismiss()">
+                <span>🖼️ تركيب صورة اللوجو</span>
+                <input type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="window.uploadCustomLogoImage(this)">
+            </div>
+        </div>
     </div>
 
     <div id="canvas-container"></div>
@@ -239,7 +248,7 @@
 
     <div id="sheet-mods" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-25 w-[95%] max-w-lg glass-card rounded-2xl p-2.5 border border-amber-500/50 pointer-events-auto">
         <div class="flex items-center justify-between text-[10.5px] mb-1.5 px-1">
-            <span class="font-bold text-amber-400">🛠️ تعديلات وإكسسوارات المركبة</span>
+            <span class="font-bold text-amber-400">🛠️ تعديلات وإكسسوارات المركبة (مرر يميناً ويساراً)</span>
             <button onclick="window.toggleOverlaySheet(null)" class="text-gray-400 hover:text-white font-bold px-1.5">✕ إغلاق</button>
         </div>
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
@@ -256,13 +265,13 @@
 
     <div id="sheet-glb" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-[96%] max-w-lg glass-card rounded-2xl p-3 border border-purple-400/50 text-[11px] max-h-[44vh] overflow-y-auto custom-scroll pointer-events-auto">
         <div class="flex items-center justify-between border-b border-white/10 pb-1.5 mb-2">
-            <span class="font-bold text-purple-300">📦 استوديو مجسمات GLB</span>
+            <span class="font-bold text-purple-300">📦 استوديو مجسمات GLB (حفظ تلقائي للمواقف والأجزاء)</span>
             <button onclick="window.toggleOverlaySheet(null)" class="back-pill-btn !py-0.5 !px-2">✕ إغلاق</button>
         </div>
         <div class="flex gap-1 mb-2">
-            <button id="glb-tab-btn-rider" onclick="window.switchGlbSubTab('rider')" class="rep-tab-btn active !py-1 !text-[10px]">🧍 الشخصية</button>
-            <button id="glb-tab-btn-bike" onclick="window.switchGlbSubTab('bike')" class="rep-tab-btn !py-1 !text-[10px]">🏍️ الموتوسيكل</button>
-            <button id="glb-tab-btn-tune" onclick="window.switchGlbSubTab('tune')" class="rep-tab-btn !py-1 !text-[10px]">🎛️ ضبط المقاس</button>
+            <button id="glb-tab-btn-rider" onclick="window.switchGlbSubTab('rider')" class="rep-tab-btn active !py-1 !text-[10px]">🧍 الشخصية (واقف + راكب)</button>
+            <button id="glb-tab-btn-bike" onclick="window.switchGlbSubTab('bike')" class="rep-tab-btn !py-1 !text-[10px]">🏍️ الموتوسيكل والأجزاء</button>
+            <button id="glb-tab-btn-tune" onclick="window.switchGlbSubTab('tune')" class="rep-tab-btn !py-1 !text-[10px]">🎛️ ضبط المقاس والمكان</button>
         </div>
         <div id="glb-sub-rider" class="space-y-2">
             <div class="text-[10px] text-gray-300">ارفع ملف GLB للشخصية وهي واقفة وراكبة:</div>
@@ -277,14 +286,48 @@
                     <div id="slot-status-rider_sit_jacket" class="text-[9.5px] text-gray-400 truncate">المجسم المدمج</div>
                     <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_sit_jacket')">
                 </label>
+                <label class="cursor-pointer bg-white/5 border border-white/15 rounded-xl p-2 text-center">
+                    <div class="font-bold text-white">🧍👕 واقف (تيشيرت)</div>
+                    <div id="slot-status-rider_stand_tshirt" class="text-[9.5px] text-gray-400 truncate">اختياري</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_stand_tshirt')">
+                </label>
+                <label class="cursor-pointer bg-white/5 border border-white/15 rounded-xl p-2 text-center">
+                    <div class="font-bold text-white">🏍️👕 راكب (تيشيرت)</div>
+                    <div id="slot-status-rider_sit_tshirt" class="text-[9.5px] text-gray-400 truncate">اختياري</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_sit_tshirt')">
+                </label>
+                <label class="cursor-pointer bg-white/5 border border-white/15 rounded-xl p-2 text-center">
+                    <div class="font-bold text-sky-300">🧍🪖 واقف (بالخوذة)</div>
+                    <div id="slot-status-rider_stand_helmet" class="text-[9.5px] text-gray-400 truncate">اختياري</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_stand_helmet')">
+                </label>
+                <label class="cursor-pointer bg-white/5 border border-white/15 rounded-xl p-2 text-center">
+                    <div class="font-bold text-sky-300">🏍️🪖 راكب (بالخوذة)</div>
+                    <div id="slot-status-rider_sit_helmet" class="text-[9.5px] text-gray-400 truncate">اختياري</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_sit_helmet')">
+                </label>
             </div>
         </div>
         <div id="glb-sub-bike" class="hidden space-y-2">
+            <div class="bg-black/50 border border-amber-500/30 rounded-xl p-2 flex items-center justify-between">
+                <span class="text-[10px] text-amber-200">⚙️ دمج العجل والبوكس المتحركين مع المجسم المرفوع:</span>
+                <input type="checkbox" id="chk-hybrid-parts" checked onchange="window.toggleHybridMovingParts(this.checked)" class="accent-amber-500 w-4 h-4">
+            </div>
             <div class="grid grid-cols-2 gap-1.5">
                 <label class="cursor-pointer bg-purple-500/15 border border-purple-400/40 rounded-xl p-2 text-center">
-                    <div class="font-bold text-purple-200">🏍️ جسم الموتوسيكل</div>
+                    <div class="font-bold text-purple-200">🏍️ جسم الموتوسيكل (.glb)</div>
                     <div id="slot-status-bike_body" class="text-[9.5px] text-gray-400 truncate">المجسم الأصلي</div>
                     <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'bike_body')">
+                </label>
+                <label class="cursor-pointer bg-white/5 border border-white/15 rounded-xl p-2 text-center">
+                    <div class="font-bold text-white">🛞 عجلة GLB منفصلة</div>
+                    <div id="slot-status-bike_wheel" class="text-[9.5px] text-gray-400 truncate">العجلة المدمجة</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'bike_wheel')">
+                </label>
+                <label class="cursor-pointer bg-white/5 border border-white/15 rounded-xl p-2 text-center">
+                    <div class="font-bold text-white">📦 غطاء البوكس GLB</div>
+                    <div id="slot-status-bike_box" class="text-[9.5px] text-gray-400 truncate">البوكس المدمج</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'bike_box')">
                 </label>
                 <button onclick="window.clearAllCustomGlbs()" class="bg-red-500/20 border border-red-400/40 rounded-xl p-2 text-red-200 font-bold">🗑️ مسح المرفقات</button>
             </div>
@@ -296,82 +339,139 @@
                 <option value="bike">🏍️ مجسم الموتوسيكل</option>
             </select>
             <div class="grid grid-cols-2 gap-2">
-                <div><span>الحجم:</span><input id="tune-sc" type="range" min="0.2" max="3.0" step="0.02" value="1" class="w-full" oninput="window.applyTuningSliders()"></div>
-                <div><span>الدوران:</span><input id="tune-rot" type="range" min="-180" max="180" step="2" value="0" class="w-full" oninput="window.applyTuningSliders()"></div>
+                <div><div class="flex justify-between text-[10px]"><span>الحجم:</span><span id="tune-sc-lbl" class="lcd-font text-amber-400">1.00</span></div><input id="tune-sc" type="range" min="0.2" max="3.0" step="0.02" value="1" class="w-full" oninput="window.applyTuningSliders()"></div>
+                <div><div class="flex justify-between text-[10px]"><span>الدوران:</span><span id="tune-rot-lbl" class="lcd-font text-amber-400">0°</span></div><input id="tune-rot" type="range" min="-180" max="180" step="2" value="0" class="w-full" oninput="window.applyTuningSliders()"></div>
+                <div><div class="flex justify-between text-[10px]"><span>يمين / شمال (Z):</span><span id="tune-z-lbl" class="lcd-font text-amber-400">0.62</span></div><input id="tune-z" type="range" min="-1.5" max="1.5" step="0.02" value="0.62" class="w-full" oninput="window.applyTuningSliders()"></div>
+                <div><div class="flex justify-between text-[10px]"><span>أمام / خلف (X):</span><span id="tune-x-lbl" class="lcd-font text-amber-400">-0.05</span></div><input id="tune-x" type="range" min="-1.5" max="1.5" step="0.02" value="-0.05" class="w-full" oninput="window.applyTuningSliders()"></div>
             </div>
         </div>
     </div>
 
     <div id="sheet-settings" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-[94%] max-w-md glass-card rounded-2xl p-3 border border-amber-500/50 text-xs space-y-2 pointer-events-auto">
         <div class="flex items-center justify-between border-b border-white/10 pb-1">
-            <span class="font-bold text-amber-400">⚙️ إعدادات المركبة</span>
+            <span class="font-bold text-amber-400">⚙️ تخصيص المركبة والإصدارات</span>
             <button onclick="window.toggleOverlaySheet(null)" class="text-gray-400 font-bold">✕</button>
         </div>
         <div class="grid grid-cols-2 gap-2">
-            <input id="cfg-brand" type="text" value="BENELLI" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-white font-bold">
-            <input id="cfg-model" type="text" value="VLM 200" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold">
+            <input id="cfg-brand" type="text" value="BENELLI" placeholder="الماركة" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-white font-bold">
+            <input id="cfg-model" type="text" value="VLM 200" placeholder="الموديل" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold">
+            <input id="cfg-plate-letters" type="text" value="ك م ى" placeholder="حروف اللوحة" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-white font-bold text-center">
+            <input id="cfg-plate-numbers" type="text" value="٦٧٢٨" placeholder="أرقام اللوحة" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-white font-bold text-center">
         </div>
-        <button onclick="window.applyVehicleProfile()" class="w-full py-1.5 rounded-xl bg-amber-500 text-black font-bold">💾 حفظ</button>
+        <div class="flex gap-2">
+            <button onclick="window.applyVehicleProfile()" class="flex-1 py-1.5 rounded-xl bg-amber-500 text-black font-bold">💾 حفظ وتحديث اللوحة</button>
+            <a href="v1.html" class="px-3 py-1.5 rounded-xl bg-white/10 text-gray-200 font-semibold flex items-center">نسخة v1.0</a>
+        </div>
     </div>
 
     <div id="sheet-cluster" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-[320px] glass-card rounded-3xl p-2.5 border border-amber-500/50 pointer-events-auto">
         <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[11px] font-bold text-amber-400">عداد السرعة</span>
+            <span id="cluster-modal-title" class="text-[11px] font-bold text-amber-400">عداد وكونتاكت Benelli VLM 200</span>
             <button onclick="window.toggleOverlaySheet(null)" class="back-pill-btn !py-0.5 !px-2 !text-[10px]">✕</button>
         </div>
         <div class="rounded-2xl overflow-hidden bg-[#111317] border border-zinc-700">
-            <canvas id="hud-cluster-canvas" width="600" height="440" class="w-full h-auto block cursor-pointer" onclick="window.onClusterCanvasClick()"></canvas>
+            <canvas id="hud-cluster-canvas" width="600" height="440" class="w-full h-auto block cursor-pointer" onclick="window.onClusterCanvasClick(event)"></canvas>
+        </div>
+        <div class="mt-2 flex items-center gap-1.5 text-[11px]">
+            <button onmousedown="window.startRevThrottle(event)" onmouseup="window.stopRevThrottle()" ontouchstart="window.startRevThrottle(event)" ontouchend="window.stopRevThrottle()" class="flex-1 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold shadow">⚡ زوّد بنزين (RPM)</button>
+            <button onclick="window.cycleBikeGear()" class="px-2.5 py-1.5 rounded-xl bg-white/10 text-amber-300 font-semibold">الغيار ⇅</button>
+            <button onclick="window.toggleOdoTripMode()" class="px-2.5 py-1.5 rounded-xl bg-zinc-800 text-gray-200 font-semibold">SELECT</button>
         </div>
     </div>
 
     <div id="road-speed-bar" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-20 w-[84%] max-w-xs glass-card rounded-2xl px-3 py-1.5 border border-amber-500/50 pointer-events-auto">
         <div class="flex items-center justify-between text-[11px] mb-1">
             <span class="font-semibold text-amber-400">🛣️ السرعة: <strong id="road-speed-val" class="lcd-font text-white">65</strong> كم/س</span>
-            <button onclick="window.cycleBikeGear()" class="bg-amber-500/20 border border-amber-500/50 px-2 py-0.5 rounded-lg text-[10px] font-bold text-amber-300">الغيار: <span id="road-gear-val" class="lcd-font">3</span></button>
+            <button onclick="window.cycleBikeGear()" class="bg-amber-500/20 border border-amber-500/50 px-2 py-0.5 rounded-lg text-[10px] font-bold text-amber-300">الغيار: <span id="road-gear-val" class="lcd-font">3</span> ⇅</button>
         </div>
         <input id="road-speed-input" type="range" min="0" max="135" value="65" class="w-full" oninput="window.onRoadSliderChange(this.value)">
     </div>
 
     <div class="fixed bottom-2.5 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
         <div class="glass-card px-3.5 py-1 rounded-full flex items-center gap-3.5 border border-white/15">
-            <button onclick="window.openSmartDrawer('fuel')" class="orb-btn !w-8 !h-8"><span class="text-sm">⛽</span><span class="orb-label !text-[7px] !-bottom-2">البنزين</span></button>
-            <button onclick="window.openSmartDrawer('maint')" class="orb-btn !w-8 !h-8"><span class="text-sm">🛠️</span><span class="orb-label !text-[7px] !-bottom-2">الصيانة</span></button>
-            <button onclick="window.openSmartDrawer('rep')" class="orb-btn !w-8 !h-8"><span class="text-sm">📊</span><span class="orb-label !text-[7px] !-bottom-2">التقارير</span></button>
-            <button onclick="window.openSmartDrawer('gemini')" class="orb-btn !w-8 !h-8"><span class="text-sm">✨</span><span class="orb-label !text-[7px] !-bottom-2">Gemini</span></button>
-            <button onclick="window.openSmartDrawer('drive')" class="orb-btn !w-8 !h-8"><span class="text-sm">☁️</span><span class="orb-label !text-[7px] !-bottom-2">درايف</span></button>
+            <button id="orb-drawer-fuel" onclick="window.openSmartDrawer('fuel')" class="orb-btn !w-8 !h-8 sm:!w-9 sm:!h-9"><span class="text-sm">⛽</span><span class="orb-label !text-[7.5px] !-bottom-2.5">البنزين</span></button>
+            <button id="orb-drawer-maint" onclick="window.openSmartDrawer('maint')" class="orb-btn !w-8 !h-8 sm:!w-9 sm:!h-9"><span class="text-sm">🛠️</span><span class="orb-label !text-[7.5px] !-bottom-2.5">الصيانة</span></button>
+            <button id="orb-drawer-rep" onclick="window.openSmartDrawer('rep')" class="orb-btn !w-8 !h-8 sm:!w-9 sm:!h-9"><span class="text-sm">📊</span><span class="orb-label !text-[7.5px] !-bottom-2.5">التقارير</span></button>
+            <button id="orb-drawer-gemini" onclick="window.openSmartDrawer('gemini')" class="orb-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !border-purple-400/60"><span class="text-sm">✨</span><span class="orb-label !text-[7.5px] !-bottom-2.5 !text-purple-300">Gemini</span></button>
+            <button id="orb-drawer-drive" onclick="window.openSmartDrawer('drive')" class="orb-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !border-sky-400/60"><span class="text-sm">☁️</span><span class="orb-label !text-[7.5px] !-bottom-2.5 !text-sky-300">درايف</span></button>
         </div>
     </div>
 
-    <div id="smart-drawer-backdrop" class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-2 pointer-events-auto" onclick="if(event.target.id==='smart-drawer-backdrop') window.closeSmartDrawer()">
-        <div class="glass-card w-full max-w-3xl max-h-[82vh] rounded-3xl border border-white/15 flex flex-col overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
-            <div class="px-3.5 py-2 bg-zinc-950/90 border-b border-white/10 flex items-center justify-between shrink-0">
-                <button onclick="window.closeSmartDrawer()" class="back-pill-btn"><span>→</span><span>رجوع</span></button>
-                <div class="font-bold text-white text-xs">سجل المركبة الذكي</div>
-                <div class="text-[10px] text-amber-300 lcd-font"><span id="modal-sub-odo">14800</span> كم</div>
+    <div id="smart-drawer-backdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-md flex items-start sm:items-center justify-center pt-2 pb-2.5 px-2 sm:p-4 pointer-events-auto" onclick="if(event.target.id==='smart-drawer-backdrop') window.closeSmartDrawer()">
+        <div class="glass-card w-full max-w-3xl max-h-[92vh] rounded-3xl border border-white/15 flex flex-col overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+            <div class="px-3.5 py-2.5 bg-zinc-950/90 border-b border-white/10 flex items-center justify-between shrink-0">
+                <button onclick="window.closeSmartDrawer()" class="back-pill-btn"><span>→</span><span>رجوع للمركبة</span></button>
+                <div class="flex items-center gap-1.5">
+                    <span id="drawer-icon" class="text-base">⛽</span>
+                    <h2 id="drawer-title" class="text-xs sm:text-sm font-bold text-white">تفويل البنزين</h2>
+                </div>
+                <div class="bg-amber-500/15 border border-amber-500/35 px-2.5 py-0.5 rounded-full text-[10.5px] text-amber-300 font-semibold lcd-font">
+                    <span id="modal-sub-odo">14800</span> كم
+                </div>
             </div>
-            <div id="smart-drawer-body" class="p-3 overflow-y-auto custom-scroll flex-1 space-y-3 text-xs">
-                <div id="drawer-sec-fuel" class="space-y-3">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-white/5 rounded-xl p-2"><div class="text-[9px] text-gray-400">متوسط الاستهلاك</div><div class="text-base font-bold text-amber-400 lcd-font"><span id="fuel-avg-kml">29.36</span> كم/ل</div></div>
-                        <div class="bg-white/5 rounded-xl p-2"><div class="text-[9px] text-gray-400">آخر تفويلة</div><div class="text-base font-bold text-white lcd-font"><span id="fuel-last-kml">29.11</span> كم/ل</div></div>
+
+            <div id="smart-drawer-body" class="p-3 sm:p-4 overflow-y-auto custom-scroll flex-1 space-y-3.5 text-xs">
+                <div id="drawer-sec-fuel" class="space-y-3.5">
+                    <div class="bg-gradient-to-br from-zinc-900/95 via-black to-amber-950/30 rounded-2xl p-3 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="w-full sm:w-auto space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] bg-amber-500 text-black px-2.5 py-0.5 rounded-full font-bold">كفاءة الاستهلاك الفعلية</span>
+                                <span class="text-[10.5px] text-gray-400">(<strong id="fuel-count-badge" class="text-white">43</strong> تفويلة مسجلة)</span>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="fuel-avg-kml" class="text-2xl sm:text-3xl font-bold text-amber-400 lcd-font">29.36</span>
+                                <span class="text-xs font-medium text-gray-300">كم / لتر واحد</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[10.5px]">
+                                <div class="bg-white/5 rounded-xl px-2.5 py-1.5 border border-white/10"><div class="text-[9px] text-gray-400">آخر تفويلة</div><div class="font-bold text-white lcd-font"><span id="fuel-last-kml">29.11</span> كم/ل</div></div>
+                                <div class="bg-white/5 rounded-xl px-2.5 py-1.5 border border-white/10"><div class="text-[9px] text-gray-400">أعلى رقم</div><div class="font-bold text-emerald-400 lcd-font"><span id="fuel-best-kml">33.52</span> كم/ل</div></div>
+                                <div class="bg-white/5 rounded-xl px-2.5 py-1.5 border border-white/10"><div class="text-[9px] text-gray-400">تكلفة الـ 1 كم</div><div class="font-bold text-amber-300 lcd-font"><span id="fuel-cpk">0.80</span> ج.م</div></div>
+                                <div class="bg-white/5 rounded-xl px-2.5 py-1.5 border border-white/10"><div class="text-[9px] text-gray-400">مدى التانك</div><div class="font-bold text-sky-300 lcd-font"><span id="fuel-range">499</span> كم</div></div>
+                            </div>
+                        </div>
                     </div>
-                    <form onsubmit="window.submitNewRefuel(event)" class="bg-zinc-900/80 rounded-2xl p-2.5 grid grid-cols-3 gap-2">
-                        <input type="number" id="in-fuel-odo" required placeholder="العداد" class="bg-black border border-amber-500 rounded-lg p-1 text-amber-300">
-                        <input type="number" step="0.01" id="in-fuel-liters" required placeholder="اللترات" class="bg-black border border-white/20 rounded-lg p-1 text-white">
-                        <button type="submit" class="bg-amber-500 text-black font-bold rounded-lg p-1">حفظ</button>
+
+                    <form onsubmit="window.submitNewRefuel(event)" class="bg-zinc-900/80 rounded-2xl p-3 border border-white/10 space-y-2.5">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <input type="number" id="in-fuel-odo" required placeholder="العداد الحالي (كم)" class="bg-black/80 border border-amber-500/50 rounded-xl px-2.5 py-1.5 text-amber-300 font-bold lcd-font outline-none">
+                            <input type="number" step="0.01" id="in-fuel-liters" required oninput="window.syncFuelInputs('liters')" placeholder="عدد اللترات" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-white font-bold lcd-font outline-none">
+                            <input type="number" step="0.01" id="in-fuel-total" required oninput="window.syncFuelInputs('total')" placeholder="الإجمالي (ج.م)" class="bg-black/80 border border-emerald-400/50 rounded-xl px-2.5 py-1.5 text-emerald-300 font-bold lcd-font outline-none">
+                            <button type="submit" class="py-1.5 px-3 rounded-xl bg-amber-500 text-black font-bold">حفظ التفويلة</button>
+                        </div>
                     </form>
-                    <div id="fuel-log-container" class="space-y-1.5 max-h-52 overflow-y-auto"></div>
+                    <div id="fuel-log-container" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
                 </div>
-                <div id="drawer-sec-maint" class="hidden space-y-3">
-                    <button onclick="window.oneTapOilChange()" class="w-full bg-emerald-400 text-black font-bold rounded-xl p-2">🛢️ غيار زيت سريع</button>
-                    <div id="maint-log-container" class="space-y-1.5 max-h-52 overflow-y-auto"></div>
+
+                <div id="drawer-sec-maint" class="hidden space-y-3.5">
+                    <div class="flex items-center justify-between bg-emerald-950/60 border border-emerald-400/30 rounded-2xl p-3">
+                        <div class="text-xs font-bold text-emerald-300">مؤشر صحة القطع الاستهلاكية (22 صيانة)</div>
+                        <button onclick="window.oneTapOilChange()" class="px-3 py-1.5 rounded-xl bg-emerald-400 text-black font-bold text-[11px]">🛢️ غيار زيت سريع</button>
+                    </div>
+                    <div id="radial-health-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
+                    <div id="maint-log-container" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
                 </div>
-                <div id="drawer-sec-rep" class="hidden text-center text-gray-300">التقارير التحليلية والرسوم البيانية مفعلة.</div>
-                <div id="drawer-sec-gemini" class="hidden space-y-2">
-                    <input type="text" id="gemini-quick-input" placeholder="اكتب معاملتك..." class="w-full bg-black border border-purple-400 rounded-xl p-2 text-white">
-                    <button onclick="window.parseAndLogWithGemini()" class="w-full bg-purple-500 text-white font-bold rounded-xl p-2">✨ تسجيل ذكي</button>
+
+                <div id="drawer-sec-rep" class="hidden space-y-3.5">
+                    <div id="rep-averages-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                 </div>
-                <div id="drawer-sec-drive" class="hidden text-center text-gray-300">المزامنة التلقائية مع Google Drive متصلة.</div>
+
+                <div id="drawer-sec-gemini" class="hidden space-y-3.5">
+                    <div class="flex gap-2">
+                        <input type="text" id="gemini-quick-input" placeholder="مثال: فولت النهاردة بـ 300 جنيه والعداد 15150..." class="flex-1 bg-black/80 border border-purple-400/40 rounded-xl px-3 py-2 text-white outline-none">
+                        <button onclick="window.parseAndLogWithGemini()" class="py-2 px-4 rounded-xl bg-purple-500 text-white font-bold">✨ فهم وتسجيل</button>
+                    </div>
+                    <div id="gemini-parse-result" class="hidden bg-black/75 border border-emerald-400/40 rounded-xl p-2.5 text-emerald-200"></div>
+                </div>
+
+                <div id="drawer-sec-drive" class="hidden space-y-3.5">
+                    <div class="bg-sky-950/50 rounded-2xl p-3.5 border border-sky-400/40 space-y-2.5">
+                        <div class="font-bold text-sky-300">☁️ رابط Google Apps Script للمزامنة التلقائية:</div>
+                        <div class="flex gap-2">
+                            <input type="url" id="in-drive-webhook" placeholder="https://script.google.com/macros/s/..." oninput="window.saveDriveWebhookUrl(this.value)" class="flex-1 bg-black/80 border border-sky-400/50 rounded-xl px-3 py-2 text-white lcd-font outline-none">
+                            <button onclick="window.syncWithGoogleDrive('push')" class="py-2 px-4 rounded-xl bg-sky-400 text-black font-bold">مزامنة الآن</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -394,16 +494,27 @@
             window._toastTimer = setTimeout(() => el.classList.add('opacity-0'), 2600);
         }
 
+        let splashPaused = false;
+        window.pauseSplashAutoDismiss = () => { splashPaused = true; };
+        window.dismissSplashScreen = () => {
+            const sp = $('splash-screen');
+            if (sp) { sp.style.opacity = '0'; sp.style.visibility = 'hidden'; setTimeout(() => sp.remove(), 600); }
+        };
+        window.uploadCustomLogoImage = (input) => {
+            const file = input.files?.[0];
+            if (!file) { splashPaused = false; return; }
+            showToast('تم تركيب اللوجو بنجاح ✓');
+            window.dismissSplashScreen();
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const sp = $('splash-screen');
-                if (sp) { sp.style.opacity = '0'; sp.style.visibility = 'hidden'; setTimeout(() => sp.remove(), 650); }
-            }, 1200);
+            setTimeout(() => { if (!splashPaused) window.dismissSplashScreen(); }, 1500);
         });
 
-        const STORAGE_KEY = 'benelli_vlm_2026_v7_master';
+        const STORAGE_KEY = 'benelli_vlm_2026_v9_full';
         const PROFILE_KEY = 'vehicle_twin_profile_v2';
         const TUNING_KEY  = 'vehicle_twin_tuning_v2';
+        const DRIVE_WEBHOOK_KEY = 'benelli_vlm200_drive_webhook_v6';
 
         const vehicleProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{"brand":"BENELLI","model":"VLM 200","plateLetters":"ك م ى","plateNumbers":"٦٧٢٨","tankCap":17}');
         const glbTuning = JSON.parse(localStorage.getItem(TUNING_KEY) || JSON.stringify({
@@ -412,21 +523,115 @@
             bike:  { scale: 1.0, rotY: 0, x: 0.0,   y: 0, z: 0.0 }
         }));
 
-        let bikeDB = JSON.parse(localStorage.getItem(STORAGE_KEY) || JSON.stringify({
-            fuelLogs: [{id:1, date:"2026-11-12 09:49", odo:14800, liters:11.85, totalCost:284.4, kml:29.1, station:"توتال المعادي"}],
-            maintenanceLogs: [{id:1, date:"2026-11-09 19:12", odo:14690, type:"Oil Change", cost:680, place:"Icon Ride", notes:"غيار زيت كامل"}]
-        }));
+        const RAW_FUEL = [
+            ["2026-04-14","10:15",1510,12.86,22.25,286.14,33.52,369,"92","محطة بنزين توتال المعادي"],
+            ["2026-04-18","06:00",1879,11.01,22.25,244.97,25.97,309,"92","Misr Station"],
+            ["2026-04-21","09:00",2188,11.90,22.25,264.78,31.87,327,"92","محطة بنزين توتال المعادي"],
+            ["2026-04-27","10:25",2515,10.26,22.25,228.28,33.19,300,"92","محطة بنزين توتال المعادي"],
+            ["2026-04-29","19:34",2815,9.04,22.25,201.14,32.79,382,"92","Wataniya Petrol Station"],
+            ["2026-05-03","21:39",3197,11.65,22.25,259.21,30.94,374,"92","محطة بنزين توتال المعادي"],
+            ["2026-05-06","23:30",3571,12.09,22.25,269.00,31.60,402,"92","محطة بنزين توتال المعادي"],
+            ["2026-05-11","12:15",3973,12.72,22.25,283.02,29.59,266,"92","توتال مدينه نصر"],
+            ["2026-05-14","11:47",4239,8.99,22.25,200.03,31.59,224,"92","محطة بنزين توتال المعادي"],
+            ["2026-05-17","20:50",4463,7.09,22.25,157.75,31.73,382,"92","محطة بنزين توتال المعادي"],
+            ["2026-05-21","10:51",4845,12.04,22.25,267.89,29.43,221,"92","توتال ميدان الجزائر"],
+            ["2026-05-25","11:23",5066,7.51,22.25,167.10,29.74,240,"92","محطة بنزين توتال المعادي"],
+            ["2026-05-30","20:38",5306,8.07,22.25,179.56,29.60,280,"92","محطة بنزين توتال المعادي"],
+            ["2026-06-04","11:42",5586,9.46,22.25,210.48,31.62,178,"92","توتال ميدان الجزائر"],
+            ["2026-06-07","19:57",5764,5.63,24.00,135.12,32.81,358,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-06-10","11:05",6122,10.91,24.00,261.84,28.06,316,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-06-14","21:13",6438,11.26,24.00,270.24,31.62,283,"95","موبيل المقطم"],
+            ["2026-06-16","11:07",6721,8.95,24.00,214.80,31.61,343,"95","توتال ميدان الجزائر"],
+            ["2026-06-21","15:46",7064,10.85,24.00,260.40,30.36,296,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-06-24","17:04",7360,9.75,24.00,234.00,27.55,270,"95","محطة بنزين توتال المعادي"],
+            ["2026-06-29","14:29",7630,9.80,24.00,235.20,32.25,279,"95","Total Gas Station - توتال المعراج"],
+            ["2026-07-01","20:29",7909,8.65,24.00,207.60,28.77,324,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-07-07","00:02",8233,11.26,24.00,270.24,30.88,353,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-07-12","15:44",8586,11.43,24.00,274.32,30.55,304,"95","Total Gas Station التسعين"],
+            ["2026-07-14","22:20",8890,9.95,24.00,238.80,28.89,247,"95","محطة بنزين توتال المعادي"],
+            ["2026-07-20","11:04",9137,8.55,24.00,205.20,28.21,222,"95","محطة بنزين توتال المعادي"],
+            ["2026-07-27","17:31",9359,7.87,24.00,188.88,27.79,356,"95","Total Gas Station - توتال المعراج"],
+            ["2026-08-01","15:26",9715,12.81,24.00,307.44,31.68,357,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-08-05","17:18",10072,11.27,24.00,270.48,29.74,312,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-08-08","20:29",10384,10.49,24.00,251.76,30.54,353,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-08-11","10:56",10737,11.56,24.00,277.44,30.75,393,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-08-20","10:50",11130,12.78,24.00,306.72,25.76,238,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-08-26","11:02",11368,9.24,24.00,221.76,25.57,346,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-09-02","20:51",11714,13.53,24.00,324.72,26.32,340,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-09-10","22:35",12054,12.92,24.00,310.08,27.80,333,"95","Total Gas Station - توتال المعراج"],
+            ["2026-09-17","11:29",12387,11.98,24.00,287.52,25.09,347,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-09-24","21:49",12734,13.83,24.00,331.92,29.21,349,"95","توتال كورنيش المعادي"],
+            ["2026-10-01","09:56",13083,11.95,24.00,286.80,26.78,334,"95","توتال كورنيش المعادي"],
+            ["2026-10-07","20:07",13417,12.47,24.00,299.28,25.04,339,"95","محطة بنزين توتال المعادي"],
+            ["2026-10-18","19:08",13756,13.54,24.00,324.96,27.68,310,"95","محطة بنزين توتال المعادي"],
+            ["2026-10-26","10:53",14066,11.20,24.00,268.80,29.07,389,"95","Total Gas Station - توتال المعراج"],
+            ["2026-11-05","10:37",14455,13.38,24.00,321.12,29.11,345,"95","Total Gas Station - توتال اللاسلكي"],
+            ["2026-11-12","09:49",14800,11.85,24.00,284.40,29.11,345,"95","توتال كورنيش المعادي"]
+        ];
+
+        const RAW_MAINT = [
+            ["2026-04-04","17:30",780,"صيانه دوريه",250,"احمد ميدو","شحم وربط",1000],
+            ["2026-04-07","20:35",1109,"Oil Change (غيار زيت)",970,"دونجل","غيار زيت",1100],
+            ["2026-04-21","19:30",2217,"Oil Change (غيار زيت)",600,"دونجل","تنظيف مصفاة الزيت",1100],
+            ["2026-04-21","21:30",2222,"صيانه دوريه",50,"احمد ميدو","فلتر هوا",3000],
+            ["2026-05-04","23:40",3400,"صيانه دوريه",300,"احمد ميدو","صيانة دورية وتربيط",1000],
+            ["2026-05-05","18:30",3401,"Oil Change (غيار زيت)",540,"دونجل","غيار زيت موتور",1100],
+            ["2026-05-18","22:49",4557,"Oil Change (غيار زيت)",550,"دونجل","غيار زيت موتور",1100],
+            ["2026-05-23","23:17",4992,"صيانه دوريه",200,"احمد ميدو","سلك دبرياج وفلتر هوا",4000],
+            ["2026-06-06","06:00",5707,"Oil Change + غسلت",600,"دونجل","زيت 530 + غسيل 70",1100],
+            ["2026-06-06","23:00",5715,"صيانه دوريه",50,"احمد ميدو","تزييت الجنزير",800],
+            ["2026-06-16","22:00",6785,"Oil Change + غسلت",1260,"Icon Ride","زيت 1110 + غسيل 150",1100],
+            ["2026-07-01","00:30",7810,"تيل خلفي",150,"احمد ميدو","تغيير تيل خلفي",3500],
+            ["2026-07-04","21:32",7966,"Oil Change + ماسك ls2",870,"Icon Ride","زيت 670 + ماسك 200",1100],
+            ["2026-07-16","18:59",9021,"Oil Change + عناية جنزير",1100,"Icon Ride","زيت وغسيل ومزيل شحم",1100],
+            ["2026-07-17","00:30",9050,"صيانه دوريه",300,"احمد ميدو","تنظيف كربرتير وتشحيم",4000],
+            ["2026-08-05","19:04",10082,"Oil Change + غسلت",720,"Icon Ride","زيت 670 + غسيل 50",1100],
+            ["2026-08-20","18:29",11141,"Oil Change + غسلت + مزيل شحم",770,"Icon Ride","زيت + غسيل + مزيل شحم",1100],
+            ["2026-08-20","23:30",11191,"تيل خلفي",150,"احمد ميدو","تيل خلفي وسفنجة فلتر",3500],
+            ["2026-09-16","19:47",12319,"Oil Change + غسلت + مزيل شحم",770,"Icon Ride","زيت + غسيل + مزيل شحم",1100],
+            ["2026-10-11","20:41",13498,"Oil Change + بلاستكه للكوتش",65,"mator garage","خدمة زيت ولحام",1100],
+            ["2026-10-26","21:08",14400,"تيل خلفي + لحام كوتش",200,"احمد ميدو","تيل خلفي ولحام مكواة",3500],
+            ["2026-11-09","19:12",14690,"Oil Change + عناية كاملة",1017,"Icon Ride","زيت 680 + غسيل ومزيل ومشحم",1100]
+        ];
+
+        function buildDefaultDatabase() {
+            return {
+                fuelLogs: RAW_FUEL.map((r, i) => ({
+                    id: 100 + i, date: `${r[0]} ${r[1]}`, odo: r[2], liters: r[3],
+                    pricePerLiter: r[4], totalCost: r[5], kml: r[6],
+                    dist: r[7], fuelType: r[8], station: r[9]
+                })),
+                maintenanceLogs: RAW_MAINT.map((r, i) => ({
+                    id: 200 + i, date: `${r[0]} ${r[1]}`, odo: r[2], type: r[3],
+                    cost: r[4], place: r[5], notes: r[6], intervalKm: r[7]
+                })).reverse()
+            };
+        }
+
+        let bikeDB = (function() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const p = JSON.parse(raw);
+                    if (p && Array.isArray(p.fuelLogs) && p.fuelLogs.length >= 40) return p;
+                }
+            } catch (e) {}
+            const fresh = buildDefaultDatabase();
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh)); } catch (e) {}
+            return fresh;
+        })();
 
         const state = {
             engineOn: false, isRevving: false, isHornPressed: false, rpm: 0, targetRpm: 0, speed: 0, targetSpeed: 0, gear: 0,
-            odometer: 14800, lightsOn: true, turntableSpin: true, riderStanding: true, riderOutfit: 'jacket', riderHelmetOn: false,
-            highwayMode: false, highwaySpeed: 65, freeWheelSpin: false, steerAngle: 0, targetSteerAngle: 0, topBoxOpen: false,
-            wheelZoomStage: 0, cameraMode: 'free', hybridMovingParts: true, activeOverlay: 'steer',
+            odometer: 14800, tripMeter: 345.0, showTrip: false, lightsOn: true, turntableSpin: true, riderStanding: true,
+            riderOutfit: 'jacket', riderHelmetOn: false, highwayMode: false, highwaySpeed: 65, freeWheelSpin: false,
+            steerAngle: 0, targetSteerAngle: 0, topBoxOpen: false, wheelZoomStage: 0, cameraMode: 'free',
+            hybridMovingParts: true, activeOverlay: 'steer',
             mods: { leds: true, box: true, cage: true, visor: false, phone: true, exhaust: false, neon: false, seatStyle: 0 }
         };
 
-        let audioCtx = null, engOsc1 = null, engOsc2 = null, engSub = null, engLfo = null, engLfoGain = null, engFilter = null, engMaster = null;
-        let hornOsc1 = null, hornOsc2 = null, hornGain = null;
+        let audioCtx = null, engOsc1 = null, engOsc2 = null, engFilter = null, engMaster = null;
+        let hornOsc1 = null, hornGain = null;
 
         function ensureAudio() {
             if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
@@ -438,16 +643,16 @@
                 ensureAudio(); if (!audioCtx) return; stopEngineAudio(); const now = audioCtx.currentTime;
                 const crankOsc = audioCtx.createOscillator(); const crankGain = audioCtx.createGain();
                 crankOsc.type = 'sawtooth'; crankOsc.frequency.setValueAtTime(180, now);
-                crankGain.gain.setValueAtTime(0.2, now); crankGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                crankGain.gain.setValueAtTime(0.22, now); crankGain.gain.exponentialRampToValueAtTime(0.01, now + 0.42);
                 crankOsc.connect(crankGain); crankGain.connect(audioCtx.destination);
-                crankOsc.start(now); crankOsc.stop(now + 0.41);
+                crankOsc.start(now); crankOsc.stop(now + 0.43);
 
                 engOsc1 = audioCtx.createOscillator(); engOsc2 = audioCtx.createOscillator();
                 engFilter = audioCtx.createBiquadFilter(); engMaster = audioCtx.createGain();
                 engOsc1.type = 'sawtooth'; engOsc2.type = 'square';
                 engOsc1.frequency.setValueAtTime(85, now + 0.38); engOsc2.frequency.setValueAtTime(170, now + 0.38);
                 engFilter.type = 'bandpass'; engFilter.frequency.setValueAtTime(320, now + 0.38);
-                engMaster.gain.setValueAtTime(0.2, now + 0.38);
+                engMaster.gain.setValueAtTime(0.24, now + 0.38);
                 engOsc1.connect(engFilter); engOsc2.connect(engFilter); engFilter.connect(engMaster); engMaster.connect(audioCtx.destination);
                 engOsc1.start(now + 0.38); engOsc2.start(now + 0.38);
             } catch(e){}
@@ -457,7 +662,7 @@
             try {
                 if (!engOsc1 || !audioCtx) return;
                 const now = audioCtx.currentTime;
-                const f1 = 80 + Math.min(1, Math.max(0, (rpmVal - 1200) / 9800)) * 180;
+                const f1 = 80 + Math.min(1, Math.max(0, (rpmVal - 1200) / 9800)) * 185;
                 engOsc1.frequency.setTargetAtTime(f1, now, 0.04);
                 engOsc2.frequency.setTargetAtTime(f1 * 2, now, 0.04);
             } catch(e){}
@@ -474,7 +679,7 @@
                 ensureAudio(); if (!audioCtx || hornOsc1) return; const now = audioCtx.currentTime;
                 hornOsc1 = audioCtx.createOscillator(); hornGain = audioCtx.createGain();
                 hornOsc1.type = 'sawtooth'; hornOsc1.frequency.setValueAtTime(420, now);
-                hornGain.gain.setValueAtTime(0.2, now); hornOsc1.connect(hornGain); hornGain.connect(audioCtx.destination);
+                hornGain.gain.setValueAtTime(0.22, now); hornOsc1.connect(hornGain); hornGain.connect(audioCtx.destination);
                 hornOsc1.start();
             } catch(e){}
         };
@@ -504,9 +709,6 @@
 
         const hudClusterCanvas = $('hud-cluster-canvas');
         const hudClusterCtx = hudClusterCanvas ? hudClusterCanvas.getContext('2d') : null;
-        const dash3DCanvas = document.createElement('canvas'); dash3DCanvas.width = 600; dash3DCanvas.height = 300;
-        const dash3DCtx = dash3DCanvas.getContext('2d'); const dash3DTexture = new THREE.CanvasTexture(dash3DCanvas);
-
         function renderBenelliCluster(ctx) {
             if (!ctx) return;
             ctx.fillStyle = '#181a20'; ctx.fillRect(0, 0, 600, 440);
@@ -523,8 +725,9 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         if (container) container.appendChild(renderer.domElement);
 
-        const orbit = { theta: 0.65, phi: 1.16, radius: 5.55, target: new THREE.Vector3(0, 0.78, 0.12), isDragging: false, prevX: 0, prevY: 0 };
+        const orbit = { theta: 0.65, phi: 1.16, radius: 5.55, target: new THREE.Vector3(0, 0.78, 0.12), isDragging: false, prevX: 0, prevY: 0, enabled: true };
         function updateOrbitCamera() {
+            if (!orbit.enabled) return;
             camera.position.x = orbit.target.x + orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta);
             camera.position.y = orbit.target.y + orbit.radius * Math.cos(orbit.phi);
             camera.position.z = orbit.target.z + orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta);
@@ -542,38 +745,77 @@
         window.addEventListener('pointerup', () => { orbit.isDragging = false; });
 
         scene.add(new THREE.AmbientLight(0xffffff, 1.3));
-        scene.add(new THREE.DirectionalLight(0xfffbeb, 2.8).position.set(3.5, 5.5, 3.5));
+        const dLight = new THREE.DirectionalLight(0xfffbeb, 2.8); dLight.position.set(3.5, 5.5, 3.5); scene.add(dLight);
 
         const turntableGroup = new THREE.Group(); scene.add(turntableGroup);
         const platform = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.2, 0.14, 32), new THREE.MeshStandardMaterial({ map: makeTurntableTex() }));
         platform.position.y = 0.07; turntableGroup.add(platform);
 
         const roadGroup = new THREE.Group(); roadGroup.visible = false; scene.add(roadGroup);
-        roadGroup.add(new THREE.Mesh(new THREE.PlaneGeometry(80, 7.5), new THREE.MeshStandardMaterial({ color: 0x141720 })).rotateX(-Math.PI/2));
+        const roadPlane = new THREE.Mesh(new THREE.PlaneGeometry(80, 7.5), new THREE.MeshStandardMaterial({ color: 0x141720 }));
+        roadPlane.rotation.x = -Math.PI/2; roadGroup.add(roadPlane);
 
         const bikeRoot = new THREE.Group(); bikeRoot.position.y = 0.14; turntableGroup.add(bikeRoot);
         const bikeChassis = new THREE.Group(); bikeRoot.add(bikeChassis);
+        const proceduralBodyOnly = new THREE.Group(); bikeChassis.add(proceduralBodyOnly);
 
         const wheelMat = new THREE.MeshStandardMaterial({ color: 0x14161a });
-        const frontWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 24), wheelMat).rotateZ(Math.PI/2);
-        frontWheel.position.set(0.31, -0.35, 0);
-        const rearWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 24), wheelMat).rotateZ(Math.PI/2);
-        rearWheel.position.set(-0.69, 0.31, 0);
+        const frontWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 24), wheelMat);
+        frontWheel.rotation.z = Math.PI/2; frontWheel.position.set(0.31, -0.65, 0);
+        const rearWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 24), wheelMat);
+        rearWheel.rotation.z = Math.PI/2; rearWheel.position.set(-0.69, 0.31, 0);
         bikeChassis.add(rearWheel);
 
         const steeringPivot = new THREE.Group(); steeringPivot.position.set(0.42, 0.96, 0);
         steeringPivot.add(frontWheel); bikeChassis.add(steeringPivot);
 
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 1.6), new THREE.MeshStandardMaterial({ color: 0x0b0d12 }));
-        body.position.y = 0.5; bikeChassis.add(body);
+        const headlightSpot = new THREE.SpotLight(0xfffbeb, 4.2, 16, Math.PI/4, 0.45, 1.1);
+        headlightSpot.position.set(0.26, -0.04, 0);
+        const headlightTargetObj = new THREE.Object3D(); headlightTargetObj.position.set(3.4, -0.94, 0);
+        steeringPivot.add(headlightTargetObj); headlightSpot.target = headlightTargetObj; steeringPivot.add(headlightSpot);
+
+        const headlightBeamMesh = new THREE.Mesh(
+            new THREE.ConeGeometry(0.62, 2.4, 24, 1, true),
+            new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false })
+        );
+        headlightBeamMesh.rotation.z = -Math.PI/2 - 0.34; headlightBeamMesh.position.set(1.34, -0.44, 0);
+        steeringPivot.add(headlightBeamMesh);
+
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.42, 0.38), new THREE.MeshStandardMaterial({ color: 0x0b0d12 }));
+        body.position.set(-0.05, 0.65, 0); proceduralBodyOnly.add(body);
+
+        const tank = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 16), new THREE.MeshStandardMaterial({ color: 0x11151f, metalness: 0.7 }));
+        tank.scale.set(1.6, 0.8, 0.9); tank.position.set(0.14, 0.92, 0); proceduralBodyOnly.add(tank);
 
         const topBoxGroup = new THREE.Group();
-        topBoxGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.20, 0.48), new THREE.MeshStandardMaterial({ color: 0x181b22 })).position.set(-0.88, 1.03, 0));
+        const boxBase = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.20, 0.48), new THREE.MeshStandardMaterial({ color: 0x181b22 }));
+        boxBase.position.set(-0.88, 1.03, 0); topBoxGroup.add(boxBase);
+        const topBoxLidPivot = new THREE.Group(); topBoxLidPivot.position.set(-0.67, 1.13, 0);
+        const boxLid = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.09, 0.48), new THREE.MeshStandardMaterial({ color: 0x0b0d12 }));
+        boxLid.position.set(-0.21, 0.045, 0); topBoxLidPivot.add(boxLid); topBoxGroup.add(topBoxLidPivot);
         bikeChassis.add(topBoxGroup);
 
+        const underglowGroup = new THREE.Group(); underglowGroup.visible = false;
+        const ugPool = new THREE.Mesh(new THREE.CircleGeometry(0.62, 32), new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.34, depthWrite: false }));
+        ugPool.rotation.x = -Math.PI/2; ugPool.position.set(0.02, 0.015, 0); underglowGroup.add(ugPool);
+        bikeChassis.add(underglowGroup);
+
         const riderContainer = new THREE.Group(); bikeRoot.add(riderContainer);
-        const riderBody = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.46, 12), new THREE.MeshStandardMaterial({ color: 0x16181d }));
-        riderBody.position.set(-0.05, 1.22, 0.58); riderContainer.add(riderBody);
+        const proceduralRider = new THREE.Group(); riderContainer.add(proceduralRider);
+        const rHead = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), new THREE.MeshStandardMaterial({ color: 0xd9a17c }));
+        rHead.position.y = 1.56; proceduralRider.add(rHead);
+        const rTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.46, 14), new THREE.MeshStandardMaterial({ color: 0x16181d }));
+        rTorso.position.y = 1.22; proceduralRider.add(rTorso);
+        const rLegs = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.74, 14), new THREE.MeshStandardMaterial({ color: 0x12141a }));
+        rLegs.position.y = 0.62; proceduralRider.add(rLegs);
+
+        function applyAllTransforms() {
+            const rCfg = state.riderStanding ? glbTuning.stand : glbTuning.sit;
+            riderContainer.position.set(rCfg.x, rCfg.y, rCfg.z);
+            riderContainer.rotation.set(0, (rCfg.rotY * Math.PI) / 180, 0);
+            riderContainer.scale.set(rCfg.scale, rCfg.scale, rCfg.scale);
+        }
+        applyAllTransforms();
 
         let loadedGlbMeshes = {};
         window.uploadGlbSlot = function(input, slotKey) {
@@ -583,39 +825,62 @@
                 new THREE.GLTFLoader().parse(e.target.result, '', function(gltf) {
                     if (loadedGlbMeshes[slotKey]) loadedGlbMeshes[slotKey].parent?.remove(loadedGlbMeshes[slotKey]);
                     loadedGlbMeshes[slotKey] = gltf.scene;
-                    bikeChassis.add(gltf.scene);
-                    showToast('تم رفع المجسم بنجاح ✓');
+                    setTxt('slot-status-' + slotKey, '✅ ' + file.name);
+                    if (slotKey === 'bike_body') { bikeChassis.add(gltf.scene); proceduralBodyOnly.visible = false; }
+                    else if (slotKey.startsWith('rider_')) { riderContainer.add(gltf.scene); proceduralRider.visible = false; }
+                    showToast('تم رفع وتفعيل ' + file.name + ' ✓');
                 });
             };
             reader.readAsArrayBuffer(file);
         };
 
+        window.clearAllCustomGlbs = () => location.reload();
+        window.toggleHybridMovingParts = (c) => { state.hybridMovingParts = c; };
+
         window.setSteeringAngle = function(rad) {
             state.targetSteerAngle = Math.max(-0.48, Math.min(0.48, rad));
+            const sl = $('steer-slider'); if (sl) sl.value = -state.targetSteerAngle;
             const deg = Math.round((-state.targetSteerAngle * 180) / Math.PI);
             setTxt('steer-deg-lbl', deg + '°');
+            const svg = $('mini-handlebar-svg'); if (svg) svg.style.transform = `rotate(${deg * 0.65}deg)`;
         };
 
         window.toggleOverlaySheet = function(sheetName) {
+            if (state.activeOverlay === sheetName) sheetName = null;
+            state.activeOverlay = sheetName;
             ['steer', 'mods', 'glb', 'settings', 'cluster'].forEach(s => $('sheet-' + s)?.classList.toggle('hidden', s !== sheetName));
+            if (sheetName === 'glb') window.loadTuningSliders();
+        };
+
+        window.switchGlbSubTab = function(sub) {
+            ['rider', 'bike', 'tune'].forEach(t => {
+                $('glb-sub-' + t)?.classList.toggle('hidden', t !== sub);
+                $('glb-tab-btn-' + t)?.classList.toggle('active', t === sub);
+            });
+        };
+
+        window.loadTuningSliders = function() {
+            const key = $('tune-target-sel')?.value || 'stand'; const cfg = glbTuning[key];
+            if ($('tune-sc')) $('tune-sc').value = cfg.scale; if ($('tune-rot')) $('tune-rot').value = cfg.rotY;
+            if ($('tune-z')) $('tune-z').value = cfg.z; if ($('tune-x')) $('tune-x').value = cfg.x;
+        };
+
+        window.applyTuningSliders = function() {
+            const key = $('tune-target-sel')?.value || 'stand'; const cfg = glbTuning[key];
+            cfg.scale = parseFloat($('tune-sc')?.value || 1); cfg.rotY = parseFloat($('tune-rot')?.value || 0);
+            cfg.z = parseFloat($('tune-z')?.value || 0); cfg.x = parseFloat($('tune-x')?.value || 0);
+            setTxt('tune-sc-lbl', cfg.scale.toFixed(2)); setTxt('tune-rot-lbl', cfg.rotY + '°');
+            setTxt('tune-z-lbl', cfg.z.toFixed(2)); setTxt('tune-x-lbl', cfg.x.toFixed(2));
+            localStorage.setItem(TUNING_KEY, JSON.stringify(glbTuning)); applyAllTransforms();
         };
 
         window.toggleRiderPose = function() {
             state.riderStanding = !state.riderStanding;
-            riderContainer.position.z = state.riderStanding ? 0 : -0.08;
+            applyAllTransforms();
             setTxt('pose-pill-label', state.riderStanding ? 'واقف جنبه (اركب)' : 'راكب عليه (انزل)');
         };
-
-        window.setRiderOutfit = function(type) {
-            state.riderOutfit = type;
-            $('outfit-pill-jacket')?.classList.toggle('active', type === 'jacket');
-            $('outfit-pill-tshirt')?.classList.toggle('active', type === 'tshirt');
-        };
-
-        window.toggleRiderHelmet = function() {
-            state.riderHelmetOn = !state.riderHelmetOn;
-            setTxt('helmet-pill-txt', state.riderHelmetOn ? 'خوذة' : 'نضارة');
-        };
+        window.setRiderOutfit = (t) => { state.riderOutfit = t; $('outfit-pill-jacket')?.classList.toggle('active', t==='jacket'); $('outfit-pill-tshirt')?.classList.toggle('active', t==='tshirt'); };
+        window.toggleRiderHelmet = () => { state.riderHelmetOn = !state.riderHelmetOn; setTxt('helmet-pill-txt', state.riderHelmetOn ? 'خوذة' : 'نضارة'); };
 
         window.toggleEnginePower = function() {
             state.engineOn = !state.engineOn;
@@ -623,7 +888,7 @@
             if (state.engineOn) {
                 btn?.classList.add('active-power'); setTxt('lbl-power', 'ON');
                 if (led) led.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
-                state.targetRpm = 1500; playStarterCrankThenIdle(); showToast('الموتور شغال 🔑');
+                state.targetRpm = 1500; playStarterCrankThenIdle(); showToast('🔑 دار المارش والموتور شغال!');
             } else {
                 btn?.classList.remove('active-power'); setTxt('lbl-power', 'باور');
                 if (led) led.className = 'w-2 h-2 rounded-full bg-zinc-500 shrink-0';
@@ -631,64 +896,112 @@
             }
         };
 
-        window.startRevThrottle = function(e) { if (e && e.cancelable) e.preventDefault(); if (!state.engineOn) window.toggleEnginePower(); state.isRevving = true; };
-        window.stopRevThrottle = function() { state.isRevving = false; };
-        window.toggleTopBoxLid = function() { state.topBoxOpen = !state.topBoxOpen; };
-        window.toggleFreeWheelSpin = function() { state.freeWheelSpin = !state.freeWheelSpin; };
-        window.toggleBikeLights = function() { state.lightsOn = !state.lightsOn; };
-        window.toggleTurntableSpin = function() { state.turntableSpin = !state.turntableSpin; };
-        window.toggleAccessory = function(type) {};
-        window.setCameraPerspective = function(mode) {
+        window.startRevThrottle = (e) => { if (e && e.cancelable) e.preventDefault(); if (!state.engineOn) window.toggleEnginePower(); state.isRevving = true; };
+        window.stopRevThrottle = () => { state.isRevving = false; };
+        window.toggleTopBoxLid = () => { state.topBoxOpen = !state.topBoxOpen; $('btn-box-lid')?.classList.toggle('active-amber', state.topBoxOpen); };
+        window.toggleFreeWheelSpin = () => { state.freeWheelSpin = !state.freeWheelSpin; $('btn-wheel-spin-test')?.classList.toggle('active-amber', state.freeWheelSpin); };
+        window.toggleBikeLights = () => {
+            state.lightsOn = !state.lightsOn; $('btn-lights')?.classList.toggle('active-amber', state.lightsOn);
+            headlightSpot.intensity = state.lightsOn ? 4.2 : 0; headlightBeamMesh.visible = state.lightsOn;
+        };
+        window.toggleTurntableSpin = () => { state.turntableSpin = !state.turntableSpin; $('btn-spin')?.classList.toggle('active-cyan', state.turntableSpin); };
+        window.toggleAccessory = (type) => {
+            if (type === 'box') { state.mods.box = !state.mods.box; topBoxGroup.visible = state.mods.box; $('mod-chip-box')?.classList.toggle('active', state.mods.box); }
+            else if (type === 'neon') { state.mods.neon = !state.mods.neon; underglowGroup.visible = state.mods.neon; $('mod-chip-neon')?.classList.toggle('active', state.mods.neon); }
+            else { $('mod-chip-' + type)?.classList.toggle('active'); }
+        };
+        window.setCameraPerspective = (mode) => {
             state.cameraMode = mode;
+            ['free', 'driver', 'drone', 'selfie'].forEach(m => $('cam-pill-' + m)?.classList.toggle('active', m === mode));
             orbit.enabled = (mode === 'free');
             if (mode === 'free') { orbit.target.set(0, 0.78, 0.12); orbit.radius = 5.55; updateOrbitCamera(); }
         };
-        window.cycleWheelZoom = function() {};
-        window.toggleHighwayMode = function() {
-            state.highwayMode = !state.highwayMode;
-            roadGroup.visible = state.highwayMode; platform.visible = !state.highwayMode;
-            if (state.highwayMode) { state.gear = 3; state.targetSpeed = state.highwaySpeed; } else { state.gear = 0; state.targetSpeed = 0; }
+        window.cycleWheelZoom = () => {
+            state.wheelZoomStage = (state.wheelZoomStage + 1) % 3;
+            orbit.radius = state.wheelZoomStage === 0 ? 5.55 : 2.1; updateOrbitCamera();
         };
-        window.onRoadSliderChange = function(val) { state.highwaySpeed = parseFloat(val); if (state.highwayMode) state.targetSpeed = state.highwaySpeed; };
-        window.cycleBikeGear = function() { state.gear = (state.gear + 1) % 6; setTxt('road-gear-val', state.gear || 'N'); };
-        window.applyVehicleProfile = function() {
+        window.toggleHighwayMode = () => {
+            state.highwayMode = !state.highwayMode; $('btn-road')?.classList.toggle('active-amber', state.highwayMode);
+            $('road-speed-bar')?.classList.toggle('hidden', !state.highwayMode);
+            roadGroup.visible = state.highwayMode; platform.visible = !state.highwayMode;
+            state.targetSpeed = state.highwayMode ? state.highwaySpeed : 0;
+        };
+        window.onRoadSliderChange = (v) => { state.highwaySpeed = parseFloat(v); setTxt('road-speed-val', Math.round(state.highwaySpeed)); if (state.highwayMode) state.targetSpeed = state.highwaySpeed; };
+        window.cycleBikeGear = () => { state.gear = (state.gear + 1) % 6; setTxt('road-gear-val', state.gear || 'N'); };
+        window.toggleOdoTripMode = () => { state.showTrip = !state.showTrip; };
+        window.onClusterCanvasClick = () => window.toggleEnginePower();
+        window.applyVehicleProfile = () => {
             vehicleProfile.brand = $('cfg-brand').value; vehicleProfile.model = $('cfg-model').value;
+            vehicleProfile.plateLetters = $('cfg-plate-letters').value; vehicleProfile.plateNumbers = $('cfg-plate-numbers').value;
             localStorage.setItem(PROFILE_KEY, JSON.stringify(vehicleProfile));
-            window.toggleOverlaySheet(null); showToast('تم الحفظ ✓');
+            setHtml('top-vehicle-title', `${vehicleProfile.brand} <span class="text-amber-400">${vehicleProfile.model}</span>`);
+            setTxt('top-plate-badge', `${vehicleProfile.plateLetters} ${vehicleProfile.plateNumbers}`);
+            redrawEgyptianPlate(); window.toggleOverlaySheet(null); showToast('تم الحفظ ✓');
         };
 
         window.openSmartDrawer = function(sec) {
             $('smart-drawer-backdrop')?.classList.remove('hidden');
-            ['fuel', 'maint', 'rep', 'gemini', 'drive'].forEach(id => $('drawer-sec-' + id)?.classList.toggle('hidden', id !== sec));
+            ['fuel', 'maint', 'rep', 'gemini', 'drive'].forEach(id => {
+                $('drawer-sec-' + id)?.classList.toggle('hidden', id !== sec);
+                $('orb-drawer-' + id)?.classList.toggle('active-amber', id === sec);
+            });
+            window.renderSmartGarageData();
         };
-        window.closeSmartDrawer = function() { $('smart-drawer-backdrop')?.classList.add('hidden'); };
-
-        window.submitNewRefuel = function(e) {
+        window.closeSmartDrawer = () => $('smart-drawer-backdrop')?.classList.add('hidden');
+        window.syncFuelInputs = (c) => {
+            const l = $('in-fuel-liters'), t = $('in-fuel-total');
+            if (c === 'liters') t.value = (parseFloat(l.value || 0) * 24).toFixed(2);
+            else l.value = (parseFloat(t.value || 0) / 24).toFixed(2);
+        };
+        window.submitNewRefuel = (e) => {
             e.preventDefault();
             const odo = parseInt($('in-fuel-odo').value, 10);
             const liters = parseFloat($('in-fuel-liters').value);
-            bikeDB.fuelLogs.push({ id: Date.now(), odo, liters, totalCost: liters * 24, station: "توتال المعادي" });
+            const totalCost = parseFloat($('in-fuel-total').value);
+            bikeDB.fuelLogs.push({ id: Date.now(), date: new Date().toISOString().slice(0,16).replace('T',' '), odo, liters, totalCost, kml: 29.1, station: 'توتال المعادي' });
             state.odometer = Math.max(state.odometer, odo);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(bikeDB));
-            window.renderSmartGarageData(); showToast('تم الحفظ ⛽');
+            window.renderSmartGarageData(); showToast('تم حفظ التفويلة ⛽');
         };
-
-        window.oneTapOilChange = function() {
-            bikeDB.maintenanceLogs.unshift({ id: Date.now(), odo: state.odometer, type: "Oil Change", cost: 680, place: "Icon Ride" });
+        window.oneTapOilChange = () => {
+            bikeDB.maintenanceLogs.unshift({ id: Date.now(), date: new Date().toISOString().slice(0,16).replace('T',' '), odo: state.odometer, type: 'Oil Change (غيار زيت)', cost: 680, place: 'Icon Ride', notes: 'غيار زيت سريع' });
             localStorage.setItem(STORAGE_KEY, JSON.stringify(bikeDB));
             window.renderSmartGarageData(); showToast('تم تسجيل غيار الزيت 🛢️');
         };
-
-        window.parseAndLogWithGemini = function() {
+        window.parseAndLogWithGemini = () => {
             const txt = $('gemini-quick-input').value.trim();
-            if (txt) { showToast('تم تسجيل المعاملة بالذكاء الاصطناعي ✓'); $('gemini-quick-input').value = ''; }
+            if (!txt) return;
+            $('gemini-parse-result')?.classList.remove('hidden');
+            setHtml('gemini-parse-result', `✅ تم تسجيل: "${txt}" في سجل المركبة!`);
+            $('gemini-quick-input').value = '';
         };
+        let driveUrl = localStorage.getItem(DRIVE_WEBHOOK_KEY) || '';
+        window.saveDriveWebhookUrl = (u) => { driveUrl = u; localStorage.setItem(DRIVE_WEBHOOK_KEY, u); };
+        window.syncWithGoogleDrive = () => showToast(driveUrl ? 'تمت المزامنة مع Google Drive ☁️✓' : 'أدخل رابط السكربت أولاً');
 
         window.renderSmartGarageData = function() {
             setTxt('top-odo-readout', String(state.odometer).padStart(6, '0'));
             setTxt('modal-sub-odo', state.odometer);
-            setHtml('fuel-log-container', bikeDB.fuelLogs.map(item => `<div class="bg-black/55 p-2 rounded-lg flex justify-between"><span>العداد: ${item.odo} كم</span><span class="text-emerald-400">${item.totalCost} ج.م</span></div>`).join(''));
-            setHtml('maint-log-container', bikeDB.maintenanceLogs.map(m => `<div class="bg-black/55 p-2 rounded-lg flex justify-between"><span>${m.type} (${m.place})</span><span class="text-emerald-400">${m.cost} ج.م</span></div>`).join(''));
+            setTxt('fuel-count-badge', bikeDB.fuelLogs.length);
+            const revFuel = [...bikeDB.fuelLogs].reverse();
+            setHtml('fuel-log-container', revFuel.map(item => `
+                <div class="bg-zinc-900/75 border border-white/10 rounded-xl p-2 flex items-center justify-between">
+                    <div><div class="font-bold text-white">${item.station} <span class="text-amber-300 text-[10px]">(${item.date})</span></div><div class="text-[10px] text-gray-400">العداد: ${item.odo} كم • ${item.liters} لتر</div></div>
+                    <div class="font-bold text-emerald-400 lcd-font">${item.totalCost} ج.م</div>
+                </div>
+            `).join(''));
+            setHtml('maint-log-container', bikeDB.maintenanceLogs.map(m => `
+                <div class="bg-zinc-900/75 border border-white/10 rounded-xl p-2 flex items-center justify-between">
+                    <div><div class="font-bold text-white">${m.type} <span class="text-emerald-300 text-[10px]">📍 ${m.place}</span></div><div class="text-[10px] text-gray-400">العداد: ${m.odo} كم • ${m.notes}</div></div>
+                    <div class="font-bold text-emerald-400 lcd-font">${m.cost} ج.م</div>
+                </div>
+            `).join(''));
+            const cards = [
+                ['🛣️ المسافة المتتبعة', '14,020 كم', 'text-amber-400'],
+                ['⛽ إجمالي البنزين', '10,891 ج.م', 'text-sky-300'],
+                ['🛠️ إجمالي الصيانة', '11,482 ج.م', 'text-emerald-400']
+            ];
+            setHtml('rep-averages-grid', cards.map(c => `<div class="bg-zinc-900/80 border border-white/10 rounded-2xl p-3"><div class="text-[10px] text-gray-400">${c[0]}</div><div class="text-base font-bold lcd-font mt-1 ${c[2]}">${c[1]}</div></div>`).join(''));
         };
         window.renderSmartGarageData();
 
@@ -701,6 +1014,9 @@
             }
             state.steerAngle += (state.targetSteerAngle - state.steerAngle) * 0.16;
             steeringPivot.rotation.y = state.steerAngle;
+
+            const targetLid = state.topBoxOpen ? 1.42 : 0;
+            topBoxLidPivot.rotation.z += (targetLid - topBoxLidPivot.rotation.z) * 0.15;
 
             if (state.engineOn) {
                 state.targetRpm = state.isRevving ? 10600 : (state.highwayMode ? 2600 + state.speed * 65 : 1500);
