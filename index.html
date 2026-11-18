@@ -3,451 +3,721 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Garage 3D - الجراج الذكي التفاعلي</title>
+    <meta name="theme-color" content="#07090e">
+    <title>Vehicle & Rider Twin 3D - v2.5 Mobile Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Orbitron:wght@600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
             font-family: 'Readex Pro', system-ui, -apple-system, sans-serif;
-            color: #f8fafc; background: #07090e;
+            color: #f8fafc;
+            background: radial-gradient(circle at 50% 38%, #1a1f2c 0%, #0b0e14 68%, #05070a 100%);
         }
         #canvas-container { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; }
         canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
         canvas:active { cursor: grabbing; }
         .lcd-font { font-family: 'Share Tech Mono', 'Orbitron', monospace; }
 
-        /* Splash Screen (شاشة البداية) */
         #splash-screen {
             position: fixed; inset: 0; z-index: 100;
-            background: radial-gradient(circle at 50% 45%, #181d2a 0%, #080a0f 80%);
+            background: radial-gradient(circle at 50% 42%, #181c26 0%, #07090e 85%);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.8s ease;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
         }
-        .splash-logo {
-            width: 140px; height: 140px; border-radius: 32px;
-            background: url('https://raw.githubusercontent.com/mrba6a/benelli-vlm-200/main/logo.png') no-repeat center/cover, #141722;
-            border: 2px solid #f97316;
-            box-shadow: 0 0 30px rgba(249, 115, 22, 0.4);
-            margin-bottom: 24px;
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 24px rgba(245, 158, 11, 0.35), inset 0 0 18px rgba(245, 158, 11, 0.2); }
+            50% { box-shadow: 0 0 42px rgba(245, 158, 11, 0.7), inset 0 0 25px rgba(245, 158, 11, 0.35); }
         }
-
-        .orb-btn {
-            width: 44px; height: 44px; border-radius: 9999px;
-            background: rgba(13, 17, 26, 0.88);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1.5px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65);
+        .splash-emblem {
+            width: 104px; height: 104px; border-radius: 26px;
+            background: linear-gradient(145deg, #161a23 0%, #090b10 100%);
+            border: 2px solid #f59e0b;
+            animation: pulseGlow 1.8s infinite;
             display: flex; align-items: center; justify-content: center;
-            color: #e2e8f0; cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
         }
-        .orb-btn:active { transform: scale(0.92); }
+        .orb-btn {
+            width: 36px; height: 36px; border-radius: 9999px;
+            background: rgba(11, 14, 21, 0.82);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+            display: flex; align-items: center; justify-content: center;
+            color: #e2e8f0; cursor: pointer; transition: all 0.18s ease; position: relative;
+        }
+        @media (min-width: 640px) { .orb-btn { width: 42px; height: 42px; } }
+        .orb-btn:active { transform: scale(0.91); }
         .orb-btn.active-power {
-            background: radial-gradient(circle, #f97316 0%, #7c2d12 100%);
-            border-color: #fdba74; color: #fff; box-shadow: 0 0 22px rgba(249, 115, 22, 0.7);
+            background: radial-gradient(circle, #16a34a 0%, #14532d 100%);
+            border-color: #4ade80; color: #fff; box-shadow: 0 0 16px rgba(74, 222, 128, 0.65);
+        }
+        .orb-btn.active-amber {
+            background: radial-gradient(circle, #f59e0b 0%, #b45309 100%);
+            border-color: #fde68a; color: #090a0f; box-shadow: 0 0 16px rgba(245, 158, 11, 0.65);
+        }
+        .orb-btn.active-cyan {
+            background: radial-gradient(circle, #0ea5e9 0%, #0369a1 100%);
+            border-color: #7dd3fc; color: #fff; box-shadow: 0 0 14px rgba(56, 189, 248, 0.55);
         }
         .orb-label {
-            position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
-            font-size: 9px; font-weight: 600; white-space: nowrap; color: #cbd5e1;
+            position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+            font-size: 8px; font-weight: 600; white-space: nowrap; color: #cbd5e1;
             text-shadow: 0 2px 4px rgba(0,0,0,0.95); pointer-events: none;
         }
         .glass-card {
-            background: rgba(12, 16, 25, 0.93);
-            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(249, 115, 22, 0.28);
-            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.85);
+            background: rgba(11, 14, 21, 0.88);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(245, 158, 11, 0.28);
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.8);
         }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.5); border-radius: 99px; }
+        .cam-pill {
+            padding: 3.5px 8.5px; border-radius: 9999px; font-size: 9.5px; font-weight: 600;
+            white-space: nowrap; color: #cbd5e1; background: rgba(15, 19, 28, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.14); transition: all 0.18s ease;
+            display: inline-flex; align-items: center; gap: 3.5px; cursor: pointer; flex-shrink: 0;
+        }
+        .cam-pill.active {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #090a0f; font-weight: 700; border-color: #fde68a;
+        }
+        .mod-chip {
+            padding: 5px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;
+            white-space: nowrap; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14); color: #cbd5e1;
+            display: inline-flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0;
+        }
+        .mod-chip.active {
+            background: rgba(245, 158, 11, 0.22); border-color: #f59e0b; color: #fde68a; font-weight: 700;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.5); border-radius: 9999px; }
+        .back-pill-btn {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #f8fafc; font-size: 10.5px; font-weight: 600; cursor: pointer;
+        }
+        .rep-tab-btn {
+            flex: 1; padding: 7px 9px; border-radius: 11px; font-size: 11px; font-weight: 600;
+            color: #94a3b8; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            text-align: center; cursor: pointer;
+        }
+        .rep-tab-btn.active {
+            background: rgba(245,158,11,0.22); color: #f59e0b; font-weight: 700; border-color: rgba(245,158,11,0.55);
+        }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 5px; border-radius: 999px;
+            background: linear-gradient(90deg, #334155 0%, #f59e0b 50%, #334155 100%);
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #090a0f; border: 2px solid #f59e0b; margin-top: -5.5px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
-
-    <!-- Splash Screen -->
     <div id="splash-screen">
-        <div class="splash-logo animate-pulse"></div>
-        <h1 class="text-xl font-bold text-orange-500 tracking-wider mb-1">GARAGE 3D</h1>
-        <p class="text-xs text-gray-400 mb-6">جاري تشغيل جراجك الذكي...</p>
-        <div class="w-32 h-1 bg-gray-800 rounded-full overflow-hidden">
-            <div class="h-full bg-orange-500 rounded-full animate-[loading_2s_ease-out_forwards]" style="width: 0%"></div>
+        <div class="splash-emblem mb-3">
+            <svg class="w-14 h-14" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="28" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4"/>
+                <path d="M32 10L50 20V36C50 46 32 54 32 54C32 54 14 46 14 36V20L32 10Z" fill="#11141c" stroke="#cbd5e1" stroke-width="2"/>
+                <circle cx="26" cy="24" r="3.5" fill="#f59e0b"/>
+                <path d="M21 38V31C21 29.5 22.5 28.5 24 28.5H28C29.5 28.5 31 29.5 31 31V38" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="38" cy="37" r="4.5" stroke="#f59e0b" stroke-width="2"/>
+            </svg>
         </div>
+        <div class="text-base font-extrabold tracking-wider text-white">VEHICLE <span class="text-amber-500">TWIN 3D</span></div>
+        <div id="splash-sub-title" class="text-[11px] text-gray-400 mt-0.5">BENELLI VLM 200 • ك م ى ٦٧٢٨</div>
     </div>
 
-    <!-- 3D Viewport -->
     <div id="canvas-container"></div>
 
-    <!-- Mobile-Optimized Top Bar -->
-    <div class="fixed top-2 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-lg pointer-events-none">
-        <div class="glass-card px-3 py-1.5 rounded-2xl flex items-center justify-between border border-orange-500/30 shadow-xl pointer-events-auto">
-            <div class="flex items-center gap-2">
-                <span id="engine-led-dot" class="w-2.5 h-2.5 rounded-full bg-zinc-500 transition-all duration-300 animate-pulse"></span>
-                <span id="top-bike-name" class="text-xs font-bold text-white">BENELLI <span class="text-orange-500">VLM 200</span></span>
+    <div class="fixed top-1.5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 w-[96%] max-w-xl pointer-events-none">
+        <div class="glass-card w-full px-2.5 py-1 rounded-full flex items-center justify-between gap-1 border border-amber-500/40 pointer-events-auto">
+            <div class="flex items-center gap-1.5 min-w-0">
+                <span id="engine-led-dot" class="w-2 h-2 rounded-full bg-zinc-500 shrink-0"></span>
+                <span id="top-vehicle-title" class="text-[10.5px] sm:text-xs font-bold text-white truncate">BENELLI <span class="text-amber-400">VLM 200</span></span>
             </div>
-            <span id="top-plate-id" class="text-[9.5px] bg-orange-500/20 text-orange-400 border border-orange-500/40 px-2.5 py-0.5 rounded-full font-semibold">ك م ى ٦٧٢٨</span>
-            <div class="flex items-center gap-2">
-                <div class="bg-black/50 px-2 py-0.5 rounded-lg border border-white/10 text-[9.5px] text-orange-400 font-bold lcd-font">
-                    <span id="top-odo-readout">014800</span> كم
+            <div class="flex items-center gap-1 shrink-0">
+                <span id="top-plate-badge" class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded-full font-semibold">ك م ى ٦٧٢٨</span>
+                <div onclick="window.toggleOverlaySheet('cluster')" class="cursor-pointer bg-black/75 px-2 py-0.5 rounded-full border border-white/15 flex items-center gap-1">
+                    <span id="top-odo-readout" class="lcd-font text-[10.5px] font-bold text-amber-400">014800</span>
+                    <span class="text-[8px] text-gray-400">كم</span>
                 </div>
-                <button onclick="window.toggleSetupPanel()" class="w-6 h-6 rounded-lg bg-white/5 hover:bg-orange-500/20 border border-white/10 flex items-center justify-center text-xs">⚙️</button>
+                <button onclick="window.toggleOverlaySheet('glb')" class="px-2 py-0.5 rounded-full bg-purple-500/25 border border-purple-400/50 text-[9px] font-bold text-purple-200">📦 GLB</button>
+                <button onclick="window.toggleOverlaySheet('settings')" class="w-6 h-6 rounded-full bg-white/10 text-amber-300 flex items-center justify-center text-[11px]">⚙️</button>
             </div>
+        </div>
+        <div class="w-full overflow-x-auto no-scrollbar flex items-center justify-start sm:justify-center gap-1 px-0.5 pointer-events-auto">
+            <button id="btn-pose-toggle" onclick="window.toggleRiderPose()" class="cam-pill active"><span>🧍</span><span id="pose-pill-label">واقف جنبه (اركب)</span></button>
+            <button id="outfit-pill-jacket" onclick="window.setRiderOutfit('jacket')" class="cam-pill active"><span>🧥</span><span>جاكيت</span></button>
+            <button id="outfit-pill-tshirt" onclick="window.setRiderOutfit('tshirt')" class="cam-pill"><span>👕</span><span>تيشيرت</span></button>
+            <button id="outfit-pill-helmet" onclick="window.toggleRiderHelmet()" class="cam-pill"><span>👓</span><span id="helmet-pill-txt">نضارة</span></button>
+            <button id="cam-pill-free" onclick="window.setCameraPerspective('free')" class="cam-pill active"><span>🔄</span><span>360°</span></button>
+            <button id="cam-pill-driver" onclick="window.setCameraPerspective('driver')" class="cam-pill"><span>👀</span><span>السائق</span></button>
+            <button id="cam-pill-drone" onclick="window.setCameraPerspective('drone')" class="cam-pill"><span>🚁</span><span>درون</span></button>
+            <button id="cam-pill-selfie" onclick="window.setCameraPerspective('selfie')" class="cam-pill"><span>🤳</span><span>مواجهة</span></button>
         </div>
     </div>
 
-    <!-- Setup Options Panel (تخصيص البيانات) -->
-    <div id="setup-panel" class="hidden fixed inset-x-4 top-14 z-30 max-w-sm mx-auto glass-card p-4 rounded-2xl border border-orange-500/40 text-xs text-gray-300">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
-            <span class="font-bold text-orange-500">⚙️ إعدادات جراجك الخاص</span>
-            <button onclick="window.toggleSetupPanel(false)" class="text-gray-400 hover:text-white">✕</button>
-        </div>
-        <div class="space-y-2.5">
-            <div>
-                <label class="block mb-1 text-[10px] text-gray-400">اسم المركبة:</label>
-                <input id="setup-name" type="text" value="Benelli VLM 200" oninput="window.updateVehicleConfig()" class="w-full bg-black/60 border border-white/10 rounded-lg p-1.5 text-white outline-none">
-            </div>
-            <div>
-                <label class="block mb-1 text-[10px] text-gray-400">رقم اللوحة:</label>
-                <input id="setup-plate" type="text" value="ك م ى ٦٧٢٨" oninput="window.updateVehicleConfig()" class="w-full bg-black/60 border border-white/10 rounded-lg p-1.5 text-white outline-none">
-            </div>
-            <div>
-                <label class="block mb-1 text-[10px] text-gray-400">قراءة العداد (كم):</label>
-                <input id="setup-odo" type="number" value="14800" oninput="window.updateVehicleConfig()" class="w-full bg-black/60 border border-white/10 rounded-lg p-1.5 text-white outline-none">
-            </div>
-            <button onclick="window.toggleSetupPanel(false)" class="w-full py-1.5 mt-1 bg-orange-500 text-black font-bold rounded-lg transition hover:brightness-110">حفظ وتحديث 🔒</button>
-        </div>
-    </div>
-
-    <!-- Compact Floating Left Sidebar (تحكمات الموتوسيكل) -->
-    <aside class="fixed left-2 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-5 pointer-events-auto">
+    <aside class="fixed left-1.5 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3.5 pointer-events-auto">
         <button id="btn-power" onclick="window.toggleEnginePower()" class="orb-btn" title="تشغيل / إيقاف">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>
-            <span class="orb-label">باور</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>
+            <span id="lbl-power" class="orb-label">باور</span>
         </button>
-        <button id="btn-lights" onclick="window.toggleLights()" class="orb-btn" title="الكشاف">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4C6.5 4 3 7.5 3 12s3.5 8 8 8c1.5 0 2.5-1 2.5-2.5V6.5C13.5 5 12.5 4 11 4z"/><path d="M16 7l5-2"/><path d="M16 12h6"/><path d="M16 17l5 2"/></svg>
+        <button id="btn-lights" onclick="window.toggleBikeLights()" class="orb-btn active-amber" title="النور">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4C6.5 4 3 7.5 3 12s3.5 8 8 8c1.5 0 2.5-1 2.5-2.5V6.5C13.5 5 12.5 4 11 4z"/><path d="M16 7l5-2"/><path d="M16 12h6"/><path d="M16 17l5 2"/></svg>
             <span class="orb-label">النور</span>
         </button>
-        <button id="btn-horn" onmousedown="window.triggerHorn(event)" onmouseup="window.releaseHorn()" ontouchstart="window.triggerHorn(event)" ontouchend="window.releaseHorn()" class="orb-btn" title="كلاكس">
+        <button id="btn-horn" onmousedown="window.startHornSound(event)" onmouseup="window.stopHornSound()" ontouchstart="window.startHornSound(event)" ontouchend="window.stopHornSound()" class="orb-btn" title="كلاكس">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7"/></svg>
             <span class="orb-label">كلاكس</span>
         </button>
-        <button id="btn-rev" onmousedown="window.triggerRev(event)" onmouseup="window.releaseRev()" ontouchstart="window.triggerRev(event)" ontouchend="window.releaseRev()" class="orb-btn" title="بنزين">
+        <button id="btn-rev" onmousedown="window.startRevThrottle(event)" onmouseup="window.stopRevThrottle()" ontouchstart="window.startRevThrottle(event)" ontouchend="window.stopRevThrottle()" class="orb-btn" title="تزويد بنزين">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             <span class="orb-label">بنزين</span>
         </button>
-        <button id="btn-box" onclick="window.toggleTopBox()" class="orb-btn" title="فتح البوكس الخلفي">
-            <span>📦</span>
-            <span id="box-label" class="orb-label">افتح البوكس</span>
+        <button id="btn-box-lid" onclick="window.toggleTopBoxLid()" class="orb-btn" title="فتح / قفل البوكس">
+            <span class="text-xs">📦</span>
+            <span id="lbl-box-lid" class="orb-label">البوكس</span>
+        </button>
+        <button id="btn-spin" onclick="window.toggleTurntableSpin()" class="orb-btn active-cyan" title="دوران 360">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+            <span class="orb-label">360°</span>
         </button>
     </aside>
 
-    <!-- Compact Floating Right Sidebar (تحكمات الراكب) -->
-    <aside class="fixed right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-5 pointer-events-auto">
-        <button id="btn-mount" onclick="window.toggleRiderPose()" class="orb-btn active-power" title="الوضع الافتراضي">
-            <span>🧍</span>
-            <span id="mount-lbl" class="orb-label">واقف جنبه</span>
+    <aside class="fixed right-1.5 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3.5 pointer-events-auto">
+        <button id="btn-steer-sheet" onclick="window.toggleOverlaySheet('steer')" class="orb-btn active-amber" title="تحكم الجادون">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 8h5l3 4h4l3-4h5"/><circle cx="12" cy="12" r="2"/><path d="M12 14v5"/></svg>
+            <span class="orb-label">الجادون</span>
         </button>
-        <div class="flex flex-col items-center gap-1">
-            <button onclick="window.turnHandlebar('left')" class="orb-btn !w-9 !h-9">◀</button>
-            <span class="text-[8px] text-orange-400 font-bold">الجادون</span>
-            <button onclick="window.turnHandlebar('right')" class="orb-btn !w-9 !h-9">▶</button>
-        </div>
-        <div class="flex flex-col items-center gap-1">
-            <button onclick="window.testWheelSpin()" class="orb-btn !w-9 !h-9">🔄</button>
-            <span class="text-[8px] text-orange-400 font-bold">العجل</span>
-        </div>
+        <button id="btn-wheel-spin-test" onclick="window.toggleFreeWheelSpin()" class="orb-btn" title="دوران الكاوتش">
+            <span class="text-xs">🛞</span>
+            <span id="lbl-wheel-spin" class="orb-label">لف العجل</span>
+        </button>
+        <button id="btn-cam-wheels" onclick="window.cycleWheelZoom()" class="orb-btn" title="زوم الكاوتش">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+            <span id="lbl-wheel-cycle" class="orb-label">الكاوتش</span>
+        </button>
+        <button id="btn-road" onclick="window.toggleHighwayMode()" class="orb-btn" title="المشي على الطريق">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 20L9 4"/><path d="M20 20L15 4"/><line x1="12" y1="7" x2="12" y2="17" stroke-dasharray="3 3"/></svg>
+            <span class="orb-label">الطريق</span>
+        </button>
+        <button id="btn-mods-menu" onclick="window.toggleOverlaySheet('mods')" class="orb-btn" title="التعديلات">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <span class="orb-label">تعديلات</span>
+        </button>
+        <button id="btn-cam-cluster" onclick="window.toggleOverlaySheet('cluster')" class="orb-btn" title="عداد السرعة">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+            <span class="orb-label">العداد</span>
+        </button>
     </aside>
 
-    <!-- PWA Bottom Floating Bar -->
-    <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
-        <div class="glass-card px-3 py-1.5 rounded-full flex items-center gap-4 border border-orange-500/20 shadow-lg">
-            <button class="flex flex-col items-center text-[10px] text-gray-400 hover:text-orange-500"><span>⛽</span>البنزين</button>
-            <button class="flex flex-col items-center text-[10px] text-gray-400 hover:text-orange-500"><span>🛠️</span>الصيانة</button>
-            <button class="flex flex-col items-center text-[10px] text-gray-400 hover:text-orange-500"><span>📊</span>التقارير</button>
+    <div id="sheet-steer" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-20 w-[86%] max-w-xs glass-card rounded-2xl px-3 py-2 border border-amber-500/40 pointer-events-auto">
+        <div class="flex items-center justify-between text-[10px] mb-1">
+            <button onclick="window.setSteeringAngle(0.45)" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-amber-500 hover:text-black font-bold">◀ أقصى شمال</button>
+            <button onclick="window.setSteeringAngle(0)" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">توسيط الجادون • <span id="steer-deg-lbl" class="lcd-font">0°</span></button>
+            <button onclick="window.setSteeringAngle(-0.45)" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-amber-500 hover:text-black font-bold">أقصى يمين ▶</button>
+        </div>
+        <div class="flex items-center gap-2">
+            <svg id="mini-handlebar-svg" class="w-10 h-6 shrink-0 transition-transform duration-150" viewBox="0 0 80 36" fill="none">
+                <rect x="2" y="13" width="18" height="8" rx="4" fill="#f59e0b"/>
+                <path d="M20 17 L32 23 L48 23 L60 17" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+                <rect x="60" y="13" width="18" height="8" rx="4" fill="#f59e0b"/>
+                <circle cx="40" cy="23" r="5" fill="#f59e0b"/>
+            </svg>
+            <input id="steer-slider" type="range" min="-0.48" max="0.48" step="0.01" value="0" class="w-full" oninput="window.setSteeringAngle(-parseFloat(this.value))">
         </div>
     </div>
 
-    <!-- Three.js Visual & Kinematics Engines -->
+    <div id="sheet-mods" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-25 w-[95%] max-w-lg glass-card rounded-2xl p-2.5 border border-amber-500/50 pointer-events-auto">
+        <div class="flex items-center justify-between text-[10.5px] mb-1.5 px-1">
+            <span class="font-bold text-amber-400">🛠️ تعديلات وإكسسوارات المركبة</span>
+            <button onclick="window.toggleOverlaySheet(null)" class="text-gray-400 hover:text-white font-bold px-1.5">✕ إغلاق</button>
+        </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            <button id="mod-chip-leds" onclick="window.toggleAccessory('leds')" class="mod-chip active">💡 سبوتات الليد</button>
+            <button id="mod-chip-box" onclick="window.toggleAccessory('box')" class="mod-chip active">📦 البوكس الخلفي</button>
+            <button id="mod-chip-cage" onclick="window.toggleAccessory('cage')" class="mod-chip active">🛡️ إكصدام الحماية</button>
+            <button id="mod-chip-visor" onclick="window.toggleAccessory('visor')" class="mod-chip">🌬️ زجاج أمامي</button>
+            <button id="mod-chip-phone" onclick="window.toggleAccessory('phone')" class="mod-chip active">📱 حامل الموبايل</button>
+            <button id="mod-chip-exhaust" onclick="window.toggleAccessory('exhaust')" class="mod-chip">🔥 شكمان كاربون</button>
+            <button id="mod-chip-neon" onclick="window.toggleAccessory('neon')" class="mod-chip">✨ إضاءة سفلية</button>
+            <button id="mod-chip-seat" onclick="window.toggleAccessory('seat')" class="mod-chip active">💺 لون الكرسي (<span id="mod-seat-txt">أصلي</span>)</button>
+        </div>
+    </div>
+
+    <div id="sheet-glb" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-[96%] max-w-lg glass-card rounded-2xl p-3 border border-purple-400/50 text-[11px] max-h-[44vh] overflow-y-auto custom-scroll pointer-events-auto">
+        <div class="flex items-center justify-between border-b border-white/10 pb-1.5 mb-2">
+            <span class="font-bold text-purple-300">📦 استوديو مجسمات GLB</span>
+            <button onclick="window.toggleOverlaySheet(null)" class="back-pill-btn !py-0.5 !px-2">✕ إغلاق</button>
+        </div>
+        <div class="flex gap-1 mb-2">
+            <button id="glb-tab-btn-rider" onclick="window.switchGlbSubTab('rider')" class="rep-tab-btn active !py-1 !text-[10px]">🧍 الشخصية</button>
+            <button id="glb-tab-btn-bike" onclick="window.switchGlbSubTab('bike')" class="rep-tab-btn !py-1 !text-[10px]">🏍️ الموتوسيكل</button>
+            <button id="glb-tab-btn-tune" onclick="window.switchGlbSubTab('tune')" class="rep-tab-btn !py-1 !text-[10px]">🎛️ ضبط المقاس</button>
+        </div>
+        <div id="glb-sub-rider" class="space-y-2">
+            <div class="text-[10px] text-gray-300">ارفع ملف GLB للشخصية وهي واقفة وراكبة:</div>
+            <div class="grid grid-cols-2 gap-1.5">
+                <label class="cursor-pointer bg-amber-500/15 border border-amber-400/40 rounded-xl p-2 text-center">
+                    <div class="font-bold text-amber-300">🧍 واقف (جاكيت)</div>
+                    <div id="slot-status-rider_stand_jacket" class="text-[9.5px] text-gray-400 truncate">المجسم المدمج</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_stand_jacket')">
+                </label>
+                <label class="cursor-pointer bg-emerald-500/15 border border-emerald-400/40 rounded-xl p-2 text-center">
+                    <div class="font-bold text-emerald-300">🏍️ راكب (جاكيت)</div>
+                    <div id="slot-status-rider_sit_jacket" class="text-[9.5px] text-gray-400 truncate">المجسم المدمج</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'rider_sit_jacket')">
+                </label>
+            </div>
+        </div>
+        <div id="glb-sub-bike" class="hidden space-y-2">
+            <div class="grid grid-cols-2 gap-1.5">
+                <label class="cursor-pointer bg-purple-500/15 border border-purple-400/40 rounded-xl p-2 text-center">
+                    <div class="font-bold text-purple-200">🏍️ جسم الموتوسيكل</div>
+                    <div id="slot-status-bike_body" class="text-[9.5px] text-gray-400 truncate">المجسم الأصلي</div>
+                    <input type="file" accept=".glb,.gltf" class="hidden" onchange="window.uploadGlbSlot(this, 'bike_body')">
+                </label>
+                <button onclick="window.clearAllCustomGlbs()" class="bg-red-500/20 border border-red-400/40 rounded-xl p-2 text-red-200 font-bold">🗑️ مسح المرفقات</button>
+            </div>
+        </div>
+        <div id="glb-sub-tune" class="hidden space-y-2">
+            <select id="tune-target-sel" onchange="window.loadTuningSliders()" class="w-full bg-black border border-amber-500/50 rounded-lg p-1 text-amber-300 font-bold">
+                <option value="stand">🧍 الشخص وهو واقف</option>
+                <option value="sit">🏍️ الشخص وهو راكب</option>
+                <option value="bike">🏍️ مجسم الموتوسيكل</option>
+            </select>
+            <div class="grid grid-cols-2 gap-2">
+                <div><span>الحجم:</span><input id="tune-sc" type="range" min="0.2" max="3.0" step="0.02" value="1" class="w-full" oninput="window.applyTuningSliders()"></div>
+                <div><span>الدوران:</span><input id="tune-rot" type="range" min="-180" max="180" step="2" value="0" class="w-full" oninput="window.applyTuningSliders()"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sheet-settings" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-[94%] max-w-md glass-card rounded-2xl p-3 border border-amber-500/50 text-xs space-y-2 pointer-events-auto">
+        <div class="flex items-center justify-between border-b border-white/10 pb-1">
+            <span class="font-bold text-amber-400">⚙️ إعدادات المركبة</span>
+            <button onclick="window.toggleOverlaySheet(null)" class="text-gray-400 font-bold">✕</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            <input id="cfg-brand" type="text" value="BENELLI" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-white font-bold">
+            <input id="cfg-model" type="text" value="VLM 200" class="bg-black/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold">
+        </div>
+        <button onclick="window.applyVehicleProfile()" class="w-full py-1.5 rounded-xl bg-amber-500 text-black font-bold">💾 حفظ</button>
+    </div>
+
+    <div id="sheet-cluster" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-[320px] glass-card rounded-3xl p-2.5 border border-amber-500/50 pointer-events-auto">
+        <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-bold text-amber-400">عداد السرعة</span>
+            <button onclick="window.toggleOverlaySheet(null)" class="back-pill-btn !py-0.5 !px-2 !text-[10px]">✕</button>
+        </div>
+        <div class="rounded-2xl overflow-hidden bg-[#111317] border border-zinc-700">
+            <canvas id="hud-cluster-canvas" width="600" height="440" class="w-full h-auto block cursor-pointer" onclick="window.onClusterCanvasClick()"></canvas>
+        </div>
+    </div>
+
+    <div id="road-speed-bar" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-20 w-[84%] max-w-xs glass-card rounded-2xl px-3 py-1.5 border border-amber-500/50 pointer-events-auto">
+        <div class="flex items-center justify-between text-[11px] mb-1">
+            <span class="font-semibold text-amber-400">🛣️ السرعة: <strong id="road-speed-val" class="lcd-font text-white">65</strong> كم/س</span>
+            <button onclick="window.cycleBikeGear()" class="bg-amber-500/20 border border-amber-500/50 px-2 py-0.5 rounded-lg text-[10px] font-bold text-amber-300">الغيار: <span id="road-gear-val" class="lcd-font">3</span></button>
+        </div>
+        <input id="road-speed-input" type="range" min="0" max="135" value="65" class="w-full" oninput="window.onRoadSliderChange(this.value)">
+    </div>
+
+    <div class="fixed bottom-2.5 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
+        <div class="glass-card px-3.5 py-1 rounded-full flex items-center gap-3.5 border border-white/15">
+            <button onclick="window.openSmartDrawer('fuel')" class="orb-btn !w-8 !h-8"><span class="text-sm">⛽</span><span class="orb-label !text-[7px] !-bottom-2">البنزين</span></button>
+            <button onclick="window.openSmartDrawer('maint')" class="orb-btn !w-8 !h-8"><span class="text-sm">🛠️</span><span class="orb-label !text-[7px] !-bottom-2">الصيانة</span></button>
+            <button onclick="window.openSmartDrawer('rep')" class="orb-btn !w-8 !h-8"><span class="text-sm">📊</span><span class="orb-label !text-[7px] !-bottom-2">التقارير</span></button>
+            <button onclick="window.openSmartDrawer('gemini')" class="orb-btn !w-8 !h-8"><span class="text-sm">✨</span><span class="orb-label !text-[7px] !-bottom-2">Gemini</span></button>
+            <button onclick="window.openSmartDrawer('drive')" class="orb-btn !w-8 !h-8"><span class="text-sm">☁️</span><span class="orb-label !text-[7px] !-bottom-2">درايف</span></button>
+        </div>
+    </div>
+
+    <div id="smart-drawer-backdrop" class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-2 pointer-events-auto" onclick="if(event.target.id==='smart-drawer-backdrop') window.closeSmartDrawer()">
+        <div class="glass-card w-full max-w-3xl max-h-[82vh] rounded-3xl border border-white/15 flex flex-col overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+            <div class="px-3.5 py-2 bg-zinc-950/90 border-b border-white/10 flex items-center justify-between shrink-0">
+                <button onclick="window.closeSmartDrawer()" class="back-pill-btn"><span>→</span><span>رجوع</span></button>
+                <div class="font-bold text-white text-xs">سجل المركبة الذكي</div>
+                <div class="text-[10px] text-amber-300 lcd-font"><span id="modal-sub-odo">14800</span> كم</div>
+            </div>
+            <div id="smart-drawer-body" class="p-3 overflow-y-auto custom-scroll flex-1 space-y-3 text-xs">
+                <div id="drawer-sec-fuel" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white/5 rounded-xl p-2"><div class="text-[9px] text-gray-400">متوسط الاستهلاك</div><div class="text-base font-bold text-amber-400 lcd-font"><span id="fuel-avg-kml">29.36</span> كم/ل</div></div>
+                        <div class="bg-white/5 rounded-xl p-2"><div class="text-[9px] text-gray-400">آخر تفويلة</div><div class="text-base font-bold text-white lcd-font"><span id="fuel-last-kml">29.11</span> كم/ل</div></div>
+                    </div>
+                    <form onsubmit="window.submitNewRefuel(event)" class="bg-zinc-900/80 rounded-2xl p-2.5 grid grid-cols-3 gap-2">
+                        <input type="number" id="in-fuel-odo" required placeholder="العداد" class="bg-black border border-amber-500 rounded-lg p-1 text-amber-300">
+                        <input type="number" step="0.01" id="in-fuel-liters" required placeholder="اللترات" class="bg-black border border-white/20 rounded-lg p-1 text-white">
+                        <button type="submit" class="bg-amber-500 text-black font-bold rounded-lg p-1">حفظ</button>
+                    </form>
+                    <div id="fuel-log-container" class="space-y-1.5 max-h-52 overflow-y-auto"></div>
+                </div>
+                <div id="drawer-sec-maint" class="hidden space-y-3">
+                    <button onclick="window.oneTapOilChange()" class="w-full bg-emerald-400 text-black font-bold rounded-xl p-2">🛢️ غيار زيت سريع</button>
+                    <div id="maint-log-container" class="space-y-1.5 max-h-52 overflow-y-auto"></div>
+                </div>
+                <div id="drawer-sec-rep" class="hidden text-center text-gray-300">التقارير التحليلية والرسوم البيانية مفعلة.</div>
+                <div id="drawer-sec-gemini" class="hidden space-y-2">
+                    <input type="text" id="gemini-quick-input" placeholder="اكتب معاملتك..." class="w-full bg-black border border-purple-400 rounded-xl p-2 text-white">
+                    <button onclick="window.parseAndLogWithGemini()" class="w-full bg-purple-500 text-white font-bold rounded-xl p-2">✨ تسجيل ذكي</button>
+                </div>
+                <div id="drawer-sec-drive" class="hidden text-center text-gray-300">المزامنة التلقائية مع Google Drive متصلة.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-banner" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 glass-card px-3.5 py-1.5 rounded-full border border-amber-500 text-[11px] font-bold text-amber-300 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none whitespace-nowrap">
+        تم التحديث ✓
+    </div>
+
     <script>
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if (splash) {
-                splash.style.opacity = 0;
-                setTimeout(() => splash.remove(), 800);
-            }
-        }, 2200);
+        const $ = (id) => document.getElementById(id);
+        const setTxt = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+        const setHtml = (id, val) => { const el = $(id); if (el) el.innerHTML = val; };
 
-        let scene, camera, renderer, motorcycleGroup, steeringGroup, wheelFront, wheelRear, boxCoverGroup;
-        let riderGroup, riderArmRight, riderArmLeft;
-        let isEngineOn = false, isRevving = false, isHornPressed = false;
-        let targetHandlebarY = 0, currentHandlebarY = 0;
-        let isPillionMounted = false; // الوضع الافتراضي: واقف
-        let isTopBoxOpen = false;
-
-        function init() {
-            const container = document.getElementById('canvas-container');
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0e1118);
-
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 2.5, 4.5);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            const light = new THREE.DirectionalLight(0xfff3c4, 1.5);
-            light.position.set(5, 10, 5);
-            scene.add(light);
-
-            // Platform
-            const ground = new THREE.Mesh(
-                new THREE.CylinderGeometry(2, 2.05, 0.1, 64),
-                new THREE.MeshStandardMaterial({ color: 0x1c1e24, roughness: 0.5 })
-            );
-            ground.position.y = -0.05;
-            scene.add(ground);
-
-            // Group for all motorcycle components
-            motorcycleGroup = new THREE.Group();
-            scene.add(motorcycleGroup);
-
-            // Build Basic Custom Bike Model with Steering assembly
-            const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 1.6), new THREE.MeshStandardMaterial({ color: 0x08090f }));
-            chassis.position.y = 0.5;
-            motorcycleGroup.add(chassis);
-
-            // Wheels
-            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.8 });
-            wheelFront = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 32), wheelMat);
-            wheelFront.rotation.z = Math.PI / 2;
-            
-            wheelRear = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 32), wheelMat);
-            wheelRear.rotation.z = Math.PI / 2;
-            wheelRear.position.set(0, 0.3, -0.6);
-            motorcycleGroup.add(wheelRear);
-
-            // Front steering setup
-            steeringGroup = new THREE.Group();
-            steeringGroup.position.set(0, 0.7, 0.6);
-            
-            const forks = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8, 16), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8 }));
-            forks.position.y = -0.2;
-            steeringGroup.add(forks);
-
-            const handlebar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 16), new THREE.MeshStandardMaterial({ color: 0x111 }));
-            handlebar.rotation.x = Math.PI / 2;
-            handlebar.position.set(0, 0.25, 0);
-            steeringGroup.add(handlebar);
-
-            wheelFront.position.set(0, -0.4, 0);
-            steeringGroup.add(wheelFront);
-
-            motorcycleGroup.add(steeringGroup);
-
-            // Box Group & Animation Setup
-            const boxBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.4), new THREE.MeshStandardMaterial({ color: 0x111 }));
-            boxBase.position.set(0, 0.8, -0.7);
-            motorcycleGroup.add(boxBase);
-
-            boxCoverGroup = new THREE.Group();
-            boxCoverGroup.position.set(0, 0.9, -0.5); // Hinge joint on front edge
-            const cover = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.4), new THREE.MeshStandardMaterial({ color: 0x222 }));
-            cover.position.set(0, 0.05, -0.2); // Offset origin to hinge
-            boxCoverGroup.add(cover);
-            motorcycleGroup.add(boxCoverGroup);
-
-            // Create customizable Rider model
-            riderGroup = new THREE.Group();
-            scene.add(riderGroup);
-
-            const riderTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.5, 16), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
-            riderTorso.position.y = 0.85;
-            riderGroup.add(riderTorso);
-
-            const head = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), new THREE.MeshStandardMaterial({ color: 0xd9a17c }));
-            head.position.set(0, 1.15, 0);
-            riderGroup.add(head);
-
-            // Right forearm kinematics
-            riderArmRight = new THREE.Group();
-            riderArmRight.position.set(-0.15, 1.0, 0.05);
-            const rArmMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.35, 12), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
-            rArmMesh.position.y = -0.15;
-            rArmMesh.rotation.z = -0.2;
-            riderArmRight.add(rArmMesh);
-            riderGroup.add(riderArmRight);
-
-            // Left forearm kinematics
-            riderArmLeft = new THREE.Group();
-            riderArmLeft.position.set(0.15, 1.0, 0.05);
-            const lArmMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.35, 12), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
-            lArmMesh.position.y = -0.15;
-            lArmMesh.rotation.z = 0.2;
-            riderArmLeft.add(lArmMesh);
-            riderGroup.add(riderArmLeft);
-
-            setRiderPose('standing');
-            animate();
+        function showToast(msg) {
+            const el = $('toast-banner');
+            if (!el) return;
+            el.textContent = msg;
+            el.classList.remove('opacity-0');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => el.classList.add('opacity-0'), 2600);
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const sp = $('splash-screen');
+                if (sp) { sp.style.opacity = '0'; sp.style.visibility = 'hidden'; setTimeout(() => sp.remove(), 650); }
+            }, 1200);
+        });
+
+        const STORAGE_KEY = 'benelli_vlm_2026_v7_master';
+        const PROFILE_KEY = 'vehicle_twin_profile_v2';
+        const TUNING_KEY  = 'vehicle_twin_tuning_v2';
+
+        const vehicleProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{"brand":"BENELLI","model":"VLM 200","plateLetters":"ك م ى","plateNumbers":"٦٧٢٨","tankCap":17}');
+        const glbTuning = JSON.parse(localStorage.getItem(TUNING_KEY) || JSON.stringify({
+            stand: { scale: 1.0, rotY: 0, x: -0.05, y: 0, z: 0.62 },
+            sit:   { scale: 1.0, rotY: 0, x: 0.0,   y: -0.035, z: 0.0 },
+            bike:  { scale: 1.0, rotY: 0, x: 0.0,   y: 0, z: 0.0 }
+        }));
+
+        let bikeDB = JSON.parse(localStorage.getItem(STORAGE_KEY) || JSON.stringify({
+            fuelLogs: [{id:1, date:"2026-11-12 09:49", odo:14800, liters:11.85, totalCost:284.4, kml:29.1, station:"توتال المعادي"}],
+            maintenanceLogs: [{id:1, date:"2026-11-09 19:12", odo:14690, type:"Oil Change", cost:680, place:"Icon Ride", notes:"غيار زيت كامل"}]
+        }));
+
+        const state = {
+            engineOn: false, isRevving: false, isHornPressed: false, rpm: 0, targetRpm: 0, speed: 0, targetSpeed: 0, gear: 0,
+            odometer: 14800, lightsOn: true, turntableSpin: true, riderStanding: true, riderOutfit: 'jacket', riderHelmetOn: false,
+            highwayMode: false, highwaySpeed: 65, freeWheelSpin: false, steerAngle: 0, targetSteerAngle: 0, topBoxOpen: false,
+            wheelZoomStage: 0, cameraMode: 'free', hybridMovingParts: true, activeOverlay: 'steer',
+            mods: { leds: true, box: true, cage: true, visor: false, phone: true, exhaust: false, neon: false, seatStyle: 0 }
+        };
+
+        let audioCtx = null, engOsc1 = null, engOsc2 = null, engSub = null, engLfo = null, engLfoGain = null, engFilter = null, engMaster = null;
+        let hornOsc1 = null, hornOsc2 = null, hornGain = null;
+
+        function ensureAudio() {
+            if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playStarterCrankThenIdle() {
+            try {
+                ensureAudio(); if (!audioCtx) return; stopEngineAudio(); const now = audioCtx.currentTime;
+                const crankOsc = audioCtx.createOscillator(); const crankGain = audioCtx.createGain();
+                crankOsc.type = 'sawtooth'; crankOsc.frequency.setValueAtTime(180, now);
+                crankGain.gain.setValueAtTime(0.2, now); crankGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                crankOsc.connect(crankGain); crankGain.connect(audioCtx.destination);
+                crankOsc.start(now); crankOsc.stop(now + 0.41);
+
+                engOsc1 = audioCtx.createOscillator(); engOsc2 = audioCtx.createOscillator();
+                engFilter = audioCtx.createBiquadFilter(); engMaster = audioCtx.createGain();
+                engOsc1.type = 'sawtooth'; engOsc2.type = 'square';
+                engOsc1.frequency.setValueAtTime(85, now + 0.38); engOsc2.frequency.setValueAtTime(170, now + 0.38);
+                engFilter.type = 'bandpass'; engFilter.frequency.setValueAtTime(320, now + 0.38);
+                engMaster.gain.setValueAtTime(0.2, now + 0.38);
+                engOsc1.connect(engFilter); engOsc2.connect(engFilter); engFilter.connect(engMaster); engMaster.connect(audioCtx.destination);
+                engOsc1.start(now + 0.38); engOsc2.start(now + 0.38);
+            } catch(e){}
+        }
+
+        function updateEngineSoundPitch(rpmVal) {
+            try {
+                if (!engOsc1 || !audioCtx) return;
+                const now = audioCtx.currentTime;
+                const f1 = 80 + Math.min(1, Math.max(0, (rpmVal - 1200) / 9800)) * 180;
+                engOsc1.frequency.setTargetAtTime(f1, now, 0.04);
+                engOsc2.frequency.setTargetAtTime(f1 * 2, now, 0.04);
+            } catch(e){}
+        }
+
+        function stopEngineAudio() {
+            try { if (engOsc1) { engOsc1.stop(); engOsc2.stop(); } } catch(e){}
+            engOsc1 = null; engOsc2 = null; engMaster = null;
+        }
+
+        window.startHornSound = function(e) {
+            if (e && e.cancelable) e.preventDefault(); state.isHornPressed = true;
+            try {
+                ensureAudio(); if (!audioCtx || hornOsc1) return; const now = audioCtx.currentTime;
+                hornOsc1 = audioCtx.createOscillator(); hornGain = audioCtx.createGain();
+                hornOsc1.type = 'sawtooth'; hornOsc1.frequency.setValueAtTime(420, now);
+                hornGain.gain.setValueAtTime(0.2, now); hornOsc1.connect(hornGain); hornGain.connect(audioCtx.destination);
+                hornOsc1.start();
+            } catch(e){}
+        };
+        window.stopHornSound = function() {
+            state.isHornPressed = false;
+            try { if (hornOsc1) hornOsc1.stop(); } catch(e){}
+            hornOsc1 = null;
+        };
+
+        function makeTurntableTex() {
+            const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+            const ctx = c.getContext('2d'); ctx.fillStyle = '#161a23'; ctx.fillRect(0,0,256,256);
+            return new THREE.CanvasTexture(c);
+        }
+
+        const plateCanvas = document.createElement('canvas'); plateCanvas.width = 400; plateCanvas.height = 340;
+        const plateCtx = plateCanvas.getContext('2d'); const plateTex = new THREE.CanvasTexture(plateCanvas);
+        function redrawEgyptianPlate() {
+            plateCtx.fillStyle = '#f8fafc'; plateCtx.fillRect(0,0,400,340);
+            plateCtx.fillStyle = '#0284c7'; plateCtx.fillRect(10,10,380,68);
+            plateCtx.fillStyle = '#090a0f'; plateCtx.font = '900 66px Arial'; plateCtx.textAlign = 'center';
+            plateCtx.fillText(vehicleProfile.plateLetters || 'ك م ى', 200, 174);
+            plateCtx.fillText(vehicleProfile.plateNumbers || '٦٧٢٨', 200, 288);
+            plateTex.needsUpdate = true;
+        }
+        redrawEgyptianPlate();
+
+        const hudClusterCanvas = $('hud-cluster-canvas');
+        const hudClusterCtx = hudClusterCanvas ? hudClusterCanvas.getContext('2d') : null;
+        const dash3DCanvas = document.createElement('canvas'); dash3DCanvas.width = 600; dash3DCanvas.height = 300;
+        const dash3DCtx = dash3DCanvas.getContext('2d'); const dash3DTexture = new THREE.CanvasTexture(dash3DCanvas);
+
+        function renderBenelliCluster(ctx) {
+            if (!ctx) return;
+            ctx.fillStyle = '#181a20'; ctx.fillRect(0, 0, 600, 440);
+            ctx.fillStyle = '#8f9983'; ctx.fillRect(252, 76, 284, 162);
+            ctx.fillStyle = '#232820'; ctx.font = 'bold 70px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(String(Math.round(state.speed)).padStart(2, '0'), 385, 178);
+        }
+
+        const container = $('canvas-container');
+        const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0b0e15);
+        const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.08, 160);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        if (container) container.appendChild(renderer.domElement);
+
+        const orbit = { theta: 0.65, phi: 1.16, radius: 5.55, target: new THREE.Vector3(0, 0.78, 0.12), isDragging: false, prevX: 0, prevY: 0 };
+        function updateOrbitCamera() {
+            camera.position.x = orbit.target.x + orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta);
+            camera.position.y = orbit.target.y + orbit.radius * Math.cos(orbit.phi);
+            camera.position.z = orbit.target.z + orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta);
+            camera.lookAt(orbit.target);
+        }
+        updateOrbitCamera();
+
+        renderer.domElement.addEventListener('pointerdown', (e) => { orbit.isDragging = true; orbit.prevX = e.clientX; orbit.prevY = e.clientY; });
+        window.addEventListener('pointermove', (e) => {
+            if (!orbit.isDragging) return;
+            orbit.theta -= (e.clientX - orbit.prevX) * 0.008;
+            orbit.phi = Math.max(0.25, Math.min(Math.PI/2 - 0.04, orbit.phi - (e.clientY - orbit.prevY) * 0.006));
+            orbit.prevX = e.clientX; orbit.prevY = e.clientY; updateOrbitCamera();
+        });
+        window.addEventListener('pointerup', () => { orbit.isDragging = false; });
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+        scene.add(new THREE.DirectionalLight(0xfffbeb, 2.8).position.set(3.5, 5.5, 3.5));
+
+        const turntableGroup = new THREE.Group(); scene.add(turntableGroup);
+        const platform = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.2, 0.14, 32), new THREE.MeshStandardMaterial({ map: makeTurntableTex() }));
+        platform.position.y = 0.07; turntableGroup.add(platform);
+
+        const roadGroup = new THREE.Group(); roadGroup.visible = false; scene.add(roadGroup);
+        roadGroup.add(new THREE.Mesh(new THREE.PlaneGeometry(80, 7.5), new THREE.MeshStandardMaterial({ color: 0x141720 })).rotateX(-Math.PI/2));
+
+        const bikeRoot = new THREE.Group(); bikeRoot.position.y = 0.14; turntableGroup.add(bikeRoot);
+        const bikeChassis = new THREE.Group(); bikeRoot.add(bikeChassis);
+
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x14161a });
+        const frontWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 24), wheelMat).rotateZ(Math.PI/2);
+        frontWheel.position.set(0.31, -0.35, 0);
+        const rearWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 24), wheelMat).rotateZ(Math.PI/2);
+        rearWheel.position.set(-0.69, 0.31, 0);
+        bikeChassis.add(rearWheel);
+
+        const steeringPivot = new THREE.Group(); steeringPivot.position.set(0.42, 0.96, 0);
+        steeringPivot.add(frontWheel); bikeChassis.add(steeringPivot);
+
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 1.6), new THREE.MeshStandardMaterial({ color: 0x0b0d12 }));
+        body.position.y = 0.5; bikeChassis.add(body);
+
+        const topBoxGroup = new THREE.Group();
+        topBoxGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.20, 0.48), new THREE.MeshStandardMaterial({ color: 0x181b22 })).position.set(-0.88, 1.03, 0));
+        bikeChassis.add(topBoxGroup);
+
+        const riderContainer = new THREE.Group(); bikeRoot.add(riderContainer);
+        const riderBody = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.46, 12), new THREE.MeshStandardMaterial({ color: 0x16181d }));
+        riderBody.position.set(-0.05, 1.22, 0.58); riderContainer.add(riderBody);
+
+        let loadedGlbMeshes = {};
+        window.uploadGlbSlot = function(input, slotKey) {
+            const file = input.files?.[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                new THREE.GLTFLoader().parse(e.target.result, '', function(gltf) {
+                    if (loadedGlbMeshes[slotKey]) loadedGlbMeshes[slotKey].parent?.remove(loadedGlbMeshes[slotKey]);
+                    loadedGlbMeshes[slotKey] = gltf.scene;
+                    bikeChassis.add(gltf.scene);
+                    showToast('تم رفع المجسم بنجاح ✓');
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        window.setSteeringAngle = function(rad) {
+            state.targetSteerAngle = Math.max(-0.48, Math.min(0.48, rad));
+            const deg = Math.round((-state.targetSteerAngle * 180) / Math.PI);
+            setTxt('steer-deg-lbl', deg + '°');
+        };
+
+        window.toggleOverlaySheet = function(sheetName) {
+            ['steer', 'mods', 'glb', 'settings', 'cluster'].forEach(s => $('sheet-' + s)?.classList.toggle('hidden', s !== sheetName));
+        };
 
         window.toggleRiderPose = function() {
-            isPillionMounted = !isPillionMounted;
-            const btn = document.getElementById('btn-mount');
-            const lbl = document.getElementById('mount-lbl');
-            if (isPillionMounted) {
-                btn.classList.add('active-power');
-                lbl.innerText = "راكب عليه";
-                setRiderPose('riding');
-                // Suspension sag animation: bike dips slightly when weight goes on
-                motorcycleGroup.position.y = -0.04;
-            } else {
-                btn.classList.remove('active-power');
-                lbl.innerText = "واقف جنبه";
-                setRiderPose('standing');
-                motorcycleGroup.position.y = 0;
-            }
+            state.riderStanding = !state.riderStanding;
+            riderContainer.position.z = state.riderStanding ? 0 : -0.08;
+            setTxt('pose-pill-label', state.riderStanding ? 'واقف جنبه (اركب)' : 'راكب عليه (انزل)');
         };
 
-        function setRiderPose(pose) {
-            if (pose === 'standing') {
-                riderGroup.position.set(0.55, 0, 0.1);
-                riderGroup.rotation.set(0, Math.PI / 1.6, 0);
-                riderArmRight.rotation.set(-0.5, 0, 0.2);
-                riderArmLeft.rotation.set(0.2, 0, -0.2);
-            } else if (pose === 'riding') {
-                riderGroup.position.set(0, 0.15, -0.08);
-                riderGroup.rotation.set(0, 0, 0);
-                riderArmRight.rotation.set(-0.8, -0.4, -0.3); // Mounted on bar/throttle
-                riderArmLeft.rotation.set(-0.8, 0.4, 0.3); // Mounted on left bar
-            }
-        }
-
-        window.turnHandlebar = function(dir) {
-            if (dir === 'left') targetHandlebarY = 0.35;
-            else if (dir === 'right') targetHandlebarY = -0.35;
-            else targetHandlebarY = 0;
-            
-            // Auto reset
-            setTimeout(() => { targetHandlebarY = 0; }, 750);
+        window.setRiderOutfit = function(type) {
+            state.riderOutfit = type;
+            $('outfit-pill-jacket')?.classList.toggle('active', type === 'jacket');
+            $('outfit-pill-tshirt')?.classList.toggle('active', type === 'tshirt');
         };
 
-        window.testWheelSpin = function() {
-            // Apply visual wheel spin testing
-            wheelFront.rotation.x += 1.5;
-            wheelRear.rotation.x += 1.5;
+        window.toggleRiderHelmet = function() {
+            state.riderHelmetOn = !state.riderHelmetOn;
+            setTxt('helmet-pill-txt', state.riderHelmetOn ? 'خوذة' : 'نضارة');
         };
 
         window.toggleEnginePower = function() {
-            isEngineOn = !isEngineOn;
-            const btn = document.getElementById('btn-power');
-            const dot = document.getElementById('engine-led-dot');
-            if (isEngineOn) {
-                btn.classList.add('active-power');
-                dot.style.background = "#f97316";
+            state.engineOn = !state.engineOn;
+            const btn = $('btn-power'), led = $('engine-led-dot');
+            if (state.engineOn) {
+                btn?.classList.add('active-power'); setTxt('lbl-power', 'ON');
+                if (led) led.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
+                state.targetRpm = 1500; playStarterCrankThenIdle(); showToast('الموتور شغال 🔑');
             } else {
-                btn.classList.remove('active-power');
-                dot.style.background = "#a1a1aa";
+                btn?.classList.remove('active-power'); setTxt('lbl-power', 'باور');
+                if (led) led.className = 'w-2 h-2 rounded-full bg-zinc-500 shrink-0';
+                state.targetRpm = 0; state.targetSpeed = 0; stopEngineAudio(); showToast('تم إيقاف الموتور');
             }
         };
 
-        window.triggerHorn = function(e) {
-            if (e && e.cancelable) e.preventDefault();
-            isHornPressed = true;
-            document.getElementById('btn-horn').classList.add('active-power');
-            if (isPillionMounted) {
-                riderArmLeft.rotation.set(-1.0, 0.1, -0.2); // Hand moves inward towards console
-            }
+        window.startRevThrottle = function(e) { if (e && e.cancelable) e.preventDefault(); if (!state.engineOn) window.toggleEnginePower(); state.isRevving = true; };
+        window.stopRevThrottle = function() { state.isRevving = false; };
+        window.toggleTopBoxLid = function() { state.topBoxOpen = !state.topBoxOpen; };
+        window.toggleFreeWheelSpin = function() { state.freeWheelSpin = !state.freeWheelSpin; };
+        window.toggleBikeLights = function() { state.lightsOn = !state.lightsOn; };
+        window.toggleTurntableSpin = function() { state.turntableSpin = !state.turntableSpin; };
+        window.toggleAccessory = function(type) {};
+        window.setCameraPerspective = function(mode) {
+            state.cameraMode = mode;
+            orbit.enabled = (mode === 'free');
+            if (mode === 'free') { orbit.target.set(0, 0.78, 0.12); orbit.radius = 5.55; updateOrbitCamera(); }
+        };
+        window.cycleWheelZoom = function() {};
+        window.toggleHighwayMode = function() {
+            state.highwayMode = !state.highwayMode;
+            roadGroup.visible = state.highwayMode; platform.visible = !state.highwayMode;
+            if (state.highwayMode) { state.gear = 3; state.targetSpeed = state.highwaySpeed; } else { state.gear = 0; state.targetSpeed = 0; }
+        };
+        window.onRoadSliderChange = function(val) { state.highwaySpeed = parseFloat(val); if (state.highwayMode) state.targetSpeed = state.highwaySpeed; };
+        window.cycleBikeGear = function() { state.gear = (state.gear + 1) % 6; setTxt('road-gear-val', state.gear || 'N'); };
+        window.applyVehicleProfile = function() {
+            vehicleProfile.brand = $('cfg-brand').value; vehicleProfile.model = $('cfg-model').value;
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(vehicleProfile));
+            window.toggleOverlaySheet(null); showToast('تم الحفظ ✓');
         };
 
-        window.releaseHorn = function() {
-            isHornPressed = false;
-            document.getElementById('btn-horn').classList.remove('active-power');
-            if (isPillionMounted) setRiderPose('riding');
+        window.openSmartDrawer = function(sec) {
+            $('smart-drawer-backdrop')?.classList.remove('hidden');
+            ['fuel', 'maint', 'rep', 'gemini', 'drive'].forEach(id => $('drawer-sec-' + id)?.classList.toggle('hidden', id !== sec));
+        };
+        window.closeSmartDrawer = function() { $('smart-drawer-backdrop')?.classList.add('hidden'); };
+
+        window.submitNewRefuel = function(e) {
+            e.preventDefault();
+            const odo = parseInt($('in-fuel-odo').value, 10);
+            const liters = parseFloat($('in-fuel-liters').value);
+            bikeDB.fuelLogs.push({ id: Date.now(), odo, liters, totalCost: liters * 24, station: "توتال المعادي" });
+            state.odometer = Math.max(state.odometer, odo);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(bikeDB));
+            window.renderSmartGarageData(); showToast('تم الحفظ ⛽');
         };
 
-        window.triggerRev = function(e) {
-            if (e && e.cancelable) e.preventDefault();
-            isRevving = true;
-            document.getElementById('btn-rev').classList.add('active-power');
-            if (isPillionMounted) {
-                riderArmRight.rotation.x = -1.1; // Forearm dips slightly forward
-            }
+        window.oneTapOilChange = function() {
+            bikeDB.maintenanceLogs.unshift({ id: Date.now(), odo: state.odometer, type: "Oil Change", cost: 680, place: "Icon Ride" });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(bikeDB));
+            window.renderSmartGarageData(); showToast('تم تسجيل غيار الزيت 🛢️');
         };
 
-        window.releaseRev = function() {
-            isRevving = false;
-            document.getElementById('btn-rev').classList.remove('active-power');
-            if (isPillionMounted) setRiderPose('riding');
+        window.parseAndLogWithGemini = function() {
+            const txt = $('gemini-quick-input').value.trim();
+            if (txt) { showToast('تم تسجيل المعاملة بالذكاء الاصطناعي ✓'); $('gemini-quick-input').value = ''; }
         };
 
-        window.toggleTopBox = function() {
-            isTopBoxOpen = !isTopBoxOpen;
-            const btn = document.getElementById('btn-box');
-            const lbl = document.getElementById('box-label');
-            if (isTopBoxOpen) {
-                btn.classList.add('active-power');
-                lbl.innerText = "البوكس مفتوح";
-            } else {
-                btn.classList.remove('active-power');
-                lbl.innerText = "افتح البوكس";
-            }
+        window.renderSmartGarageData = function() {
+            setTxt('top-odo-readout', String(state.odometer).padStart(6, '0'));
+            setTxt('modal-sub-odo', state.odometer);
+            setHtml('fuel-log-container', bikeDB.fuelLogs.map(item => `<div class="bg-black/55 p-2 rounded-lg flex justify-between"><span>العداد: ${item.odo} كم</span><span class="text-emerald-400">${item.totalCost} ج.م</span></div>`).join(''));
+            setHtml('maint-log-container', bikeDB.maintenanceLogs.map(m => `<div class="bg-black/55 p-2 rounded-lg flex justify-between"><span>${m.type} (${m.place})</span><span class="text-emerald-400">${m.cost} ج.م</span></div>`).join(''));
         };
+        window.renderSmartGarageData();
 
-        window.toggleSetupPanel = function(show) {
-            const panel = document.getElementById('setup-panel');
-            if (show === false) panel.classList.add('hidden');
-            else panel.classList.toggle('hidden');
-        };
-
-        window.updateVehicleConfig = function() {
-            const name = document.getElementById('setup-name').value;
-            const plate = document.getElementById('setup-plate').value;
-            const odo = document.getElementById('setup-odo').value;
-
-            document.getElementById('top-bike-name').innerHTML = name;
-            document.getElementById('top-plate-id').innerHTML = plate;
-            document.getElementById('top-odo-readout').innerHTML = odo;
-        };
-
-        window.toggleLights = function() {
-            document.getElementById('btn-lights').classList.toggle('active-power');
-        };
-
+        const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
-            
-            // Handlebar Interpolation (Steering Axis & Front Wheel Y Rotation)
-            currentHandlebarY += (targetHandlebarY - currentHandlebarY) * 0.12;
-            steeringGroup.rotation.y = currentHandlebarY;
-
-            // Box hinge animation 0-90deg open limit
-            const targetRot = isTopBoxOpen ? -Math.PI / 2 : 0;
-            boxCoverGroup.rotation.x += (targetRot - boxCoverGroup.rotation.x) * 0.14;
-
-            if (isRevving || isEngineOn) {
-                // High frequency mini engine vibration idle effects
-                motorcycleGroup.position.y += Math.sin(Date.now() * 0.08) * 0.0015;
+            const dt = Math.min(clock.getDelta(), 0.1);
+            if (state.turntableSpin && !state.highwayMode && state.cameraMode === 'free' && !orbit.isDragging) {
+                turntableGroup.rotation.y += dt * 0.32;
             }
+            state.steerAngle += (state.targetSteerAngle - state.steerAngle) * 0.16;
+            steeringPivot.rotation.y = state.steerAngle;
 
-            // Global 3D turntable spin rotation
-            scene.rotation.y += 0.0018;
+            if (state.engineOn) {
+                state.targetRpm = state.isRevving ? 10600 : (state.highwayMode ? 2600 + state.speed * 65 : 1500);
+            } else { state.targetRpm = 0; }
+            state.rpm += (state.targetRpm - state.rpm) * 0.14;
+            state.speed += (state.targetSpeed - state.speed) * 0.08;
 
+            if (state.engineOn) updateEngineSoundPitch(state.rpm);
+
+            if (state.speed > 0.2 || state.freeWheelSpin) {
+                const rot = ((state.freeWheelSpin ? 60 : state.speed) / 3.6 / 0.305) * dt;
+                frontWheel.rotation.z -= rot; rearWheel.rotation.z -= rot;
+            }
+            renderBenelliCluster(hudClusterCtx);
             renderer.render(scene, camera);
         }
-
-        window.onload = init;
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        animate();
     </script>
 </body>
 </html>
